@@ -1,4 +1,4 @@
-# xiti
+# latexHelper
 
 ## Project setup
 ```
