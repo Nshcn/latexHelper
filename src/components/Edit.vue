@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <div class="templates-wrap">
-      {{curTemplate}}
       <el-tag v-for="item in templateStore"
               class="template-item"
+              :type="curTemplate===item.name?'danger':'info'"
               :key="item.name"
               @close="deleteTemplate(item.name)"
               @click="showTemplate(item.name)"
@@ -409,6 +409,10 @@ export default {
 }
 .template-item {
   cursor: pointer;
+}
+
+.active {
+  background: black !important;
 }
 
 .el-tag + .el-tag {
