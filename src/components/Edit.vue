@@ -6,6 +6,10 @@
         <div class="region">
           <div class="up-region">
             <span>模板列表</span>
+            <el-tooltip content="点击下方保存当前编辑区为新模板即可添加自定义模板"
+                        placement="top">
+              <i class="el-icon-question" />
+            </el-tooltip>
           </div>
           <div class="down-region">
             <el-tag v-for="item in templateStore"
@@ -15,7 +19,7 @@
                     @close="deleteTemplate(item.name)"
                     @click="showTemplate(item.name)"
                     closable>
-              <i class="el-icon-tickets"></i>
+              <i class="el-icon-tickets" />
               {{item.name}}
             </el-tag>
           </div>
@@ -80,6 +84,10 @@
           <div class="region">
             <div class="up-region">
               <span>代码片段</span>
+              <el-tooltip content="点击下方保存当前编辑区为新片段即可添加常用代码片段"
+                          placement="top">
+                <i class="el-icon-question" />
+              </el-tooltip>
             </div>
             <div class="down-region">
               <el-tag v-for="item in snippetStore"
@@ -278,7 +286,7 @@ export default {
       if (this.originText === '') {
         this.$message({
           type: 'warning',
-          message: '编辑区为空',
+          message: '模板编辑区为空',
         })
         return
       }
@@ -300,7 +308,7 @@ export default {
             console.log(this.templateStore)
             this.$message({
               type: 'success',
-              message: '覆盖成功!',
+              message: '模板覆盖成功!',
             })
           })
           .catch(() => {})
@@ -311,7 +319,7 @@ export default {
         })
         this.$message({
           type: 'success',
-          message: '保存成功',
+          message: '模板保存成功',
         })
       }
     },
@@ -591,7 +599,7 @@ export default {
             this.snippetStore[repeatIndex].content = this.latexCode
             this.$message({
               type: 'success',
-              message: '覆盖成功!',
+              message: 'Latex片段覆盖成功!',
             })
           })
           .catch(() => {})
@@ -602,7 +610,7 @@ export default {
         })
         this.$message({
           type: 'success',
-          message: '保存成功',
+          message: 'Latex片段保存成功',
         })
       }
     },
