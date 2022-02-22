@@ -1,49 +1,26 @@
 <template>
-  <div id="app">
+  <div id="app"
+       style="margin-top:50px">
+
     <div class="templates-wrap">
       <el-tag v-for="item in templateStore"
               class="template-item"
-              :type="curTemplate===item.name?'danger':'info'"
               :key="item.name"
               @close="deleteTemplate(item.name)"
               @click="showTemplate(item.name)"
               closable>{{item.name}}</el-tag>
-      <el-input class="input-new-tag"
-                v-if="inputVisible"
-                v-model="newTemplateName"
-                ref="saveTagInput"
-                size="small"
-                @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm">
-      </el-input>
-      <el-button v-else
-                 class="button-new-tag"
-                 size="small"
-                 @click="addTemplate">新建模板</el-button>
-      <el-button type="primary"
-                 size="small"
-                 @click="saveTemplate">保存模板</el-button>
-      <el-popover placement="right"
-                  size="small"
-                  trigger="click">
-        <el-input v-model="newTemplateName"
-                  placeholder="请输入模板名称"></el-input>
-        <el-button type="primary"
-                   size="small"
-                   @click="saveTemplate">确认</el-button>
-        <el-button type="primary"
-                   size="small"
-                   @click="saveTemplate">取消</el-button>
-        <el-button slot="reference">保存当前编辑区为模板</el-button>
-      </el-popover>
+
     </div>
-    <el-button type="primary"
+    <el-button type="text"
+               size="small"
+               @click="saveTemplate">保存当前编辑区为新模板</el-button>
+    <el-button type="text"
                size="small"
                @click="preview">预览</el-button>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="originText = ''">清空</el-button>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="addMark(listType)">+ 列表</el-button>
     <el-radio v-model="listType"
@@ -51,23 +28,25 @@
     <el-radio v-model="listType"
               label="ul">无序</el-radio>
 
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="addMark('fig')">+ 图片</el-button>
     <a href="https://www.latex-tables.com/#"
        target="_blank">表格</a>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="addMark('opt')">+ 选项</el-button>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="addMark('kaishu')">+ 楷书</el-button>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="addMark('bf')">+ 粗体文本</el-button>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="test">test</el-button>
+    <el-input v-model="templateName"
+              placeholder="请输入模板名称"></el-input>
     <el-input type="textarea"
               id="edit-area"
               placeholder="请输入内容"
@@ -83,7 +62,7 @@
               @keydown.tab.native="tabInput($event)"
               show-word-limit>
     </el-input>
-    <el-button type="primary"
+    <el-button type="text"
                size="small"
                @click="copyResult">复制</el-button>
   </div>
@@ -105,7 +84,7 @@ export default {
     return {
       originText: '',
       inputVisible: false,
-      newTemplateName: '',
+      templateName: '',
       curTemplate: '空白',
       latexCode: '',
       listType: 'ol',
@@ -137,7 +116,7 @@ export default {
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
     showTemplate(templateName) {
-      this.curTemplate = templateName
+      this.templateName = templateName
       for (let item of this.templateStore) {
         if (item.name === templateName) {
           this.originText = item.content
@@ -165,43 +144,56 @@ export default {
               })
               return
             })
-            .catch(() => {
-              this.$message({
-                type: 'info',
-                message: '已取消删除',
-              })
-              return
-            })
+            .catch(() => {})
         }
       }
     },
-    addTemplate() {
-      this.inputVisible = true
-      this.$nextTick(() => {
-        this.$refs.saveTagInput.$refs.input.focus()
-      })
-    },
-    handleInputConfirm() {
-      let newTemplateName = this.newTemplateName
-      if (newTemplateName) {
+    saveTemplate() {
+      if (this.templateName === '') {
+        this.$message({
+          type: 'warning',
+          message: '请输入模板名称',
+        })
+        return
+      }
+      if (this.originText === '') {
+        this.$message({
+          type: 'warning',
+          message: '编辑区为空',
+        })
+        return
+      }
+      let repeatIndex = -1
+      for (let i = 0; i < this.templateStore.length; i++) {
+        if (this.templateStore[i].name === this.templateName) {
+          repeatIndex = i
+          break
+        }
+      }
+      if (repeatIndex !== -1) {
+        this.$confirm(`"${this.templateName}"模板已存在, 是否覆盖?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => {
+            this.templateStore[repeatIndex].content = this.originText
+            this.$message({
+              type: 'success',
+              message: '覆盖成功!',
+            })
+          })
+          .catch(() => {})
+      } else {
         this.templateStore.push({
-          name: newTemplateName,
-          content: '',
+          name: this.templateName,
+          content: this.originText,
+        })
+        this.$message({
+          type: 'success',
+          message: '保存成功',
         })
       }
-      this.inputVisible = false
-      this.newTemplateName = ''
-    },
-    saveTemplate() {
-      // for (let i = 0; i < this.templateStore.length; i++) {
-      //   if (this.templateStore[i].name === this.curTemplate) {
-      //     this.templateStore[i].content = this.originText
-      //   }
-      // }
-      this.templateStore.push({
-        name: this.newTemplateName,
-        content: this.originText,
-      })
     },
     /**
      * 预览
@@ -225,6 +217,7 @@ export default {
         return ''
       })
       this.latexCode = result
+      this.copyResult()
     },
 
     parseSingleType(type) {
@@ -408,7 +401,7 @@ export default {
         document.body.removeChild(textarea)
       }
       this.$message({
-        message: '复制成功',
+        message: '已复制到剪切板',
         type: 'success',
       })
     },
@@ -424,6 +417,7 @@ export default {
   padding: 10px;
 }
 .template-item {
+  /* margin: 0 10px 0 0 !important; */
   cursor: pointer;
 }
 
