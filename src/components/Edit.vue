@@ -1,88 +1,130 @@
 <template>
-  <div id="app"
-       style="margin-top:50px">
+  <div id="app">
+    <header>latexHelper</header>
+    <section class="origin-section">
+      <div class="templates-wrap wrap">
+        <div class="region">
+          <div class="up-region">
+            <span>模板列表</span>
+          </div>
+          <div class="down-region">
+            <el-tag v-for="item in templateStore"
+                    class="template-item"
+                    size="small"
+                    :key="item.name"
+                    @close="deleteTemplate(item.name)"
+                    @click="showTemplate(item.name)"
+                    closable>
+              <i class="el-icon-tickets"></i>
+              {{item.name}}
+            </el-tag>
+          </div>
+        </div>
+      </div>
+      <div class="insert-btn">
+        <el-button type="text"
+                   size="small"
+                   @click="addMark(listType)"><i class="el-icon-plus" />列表</el-button>
+        <!-- <el-radio v-model="listType"
+                  label="ol">有序</el-radio>
+        <el-radio v-model="listType"
+                  label="ul">无序</el-radio> -->
+        <el-button type="text"
+                   size="small"
+                   @click="addMark('fig')"><i class="el-icon-plus" />图片</el-button>
+        <!-- <a href="https://www.latex-tables.com/#"
+           target="_blank">表格</a> -->
+        <el-button type="text"
+                   size="small"
+                   @click="addMark('opt')"><i class="el-icon-plus" />选项</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="addMark('kaishu')"><i class="el-icon-plus" />楷书</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="addMark('bf')"><i class="el-icon-plus" />粗体文本</el-button>
+        <!-- <el-button type="text"
+                   size="small"
+                   @click="test">test</el-button> -->
+      </div>
+      <div class="name-input">
+        <span>模板名称</span>
+        <el-input v-model="templateName"
+                  size="small"
+                  placeholder="请输入模板名称"></el-input>
+      </div>
+      <div class="operate-area">
+        <el-button type="text"
+                   size="small"
+                   @click="saveTemplate">保存当前编辑区为新模板</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="preview">生成latex</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="originText = ''">清空</el-button>
+      </div>
+      <el-input type="textarea"
+                class="text-area"
+                id="edit-area"
+                placeholder="请输入内容"
+                v-model="originText"
+                :autosize="{ minRows: 8}"
+                @keydown.tab.native="tabInput($event)"
+                show-word-limit>
+      </el-input>
+    </section>
+    <section class="latex-section">
+      <div class="insert-btn">
+        <div class="latex-snippet-wrap">
+          <div class="region">
+            <div class="up-region">
+              <span>代码片段</span>
+            </div>
+            <div class="down-region">
+              <el-tag v-for="item in snippetStore"
+                      size="small"
+                      class="snippet-item"
+                      :key="item.name"
+                      @close="deleteSnippet(item.name)"
+                      @click="insertSnippet(item.name)"
+                      closable>
+                <i class="el-icon-plus" />
+                {{item.name}}
+              </el-tag>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="templates-wrap">
-      <el-tag v-for="item in templateStore"
-              class="template-item"
-              :key="item.name"
-              @close="deleteTemplate(item.name)"
-              @click="showTemplate(item.name)"
-              closable>{{item.name}}</el-tag>
+      <div class="name-input">
+        <span>片段名称</span>
+        <el-input v-model="snippetName"
+                  size="small"
+                  placeholder="请输入片段名称"></el-input>
+      </div>
+      <div class="operate-area">
+        <el-button type="text"
+                   size="small"
+                   @click="saveSnippet">保存当前编辑区为新片段</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="latexCode = ''">清空</el-button>
+        <el-button type="text"
+                   size="small"
+                   @click="copyResult">复制</el-button>
+      </div>
+      <el-input type="textarea"
+                class="text-area"
+                id="preview-area"
+                placeholder="预览"
+                v-model="latexCode"
+                :autosize="{ minRows: 8}"
+                @keydown.tab.native="tabInput($event)"
+                show-word-limit>
+      </el-input>
+    </section>
 
-    </div>
-    <el-button type="text"
-               size="small"
-               @click="saveTemplate">保存当前编辑区为新模板</el-button>
-    <el-button type="text"
-               size="small"
-               @click="preview">预览</el-button>
-    <el-button type="text"
-               size="small"
-               @click="originText = ''">清空</el-button>
-    <el-button type="text"
-               size="small"
-               @click="addMark(listType)">+ 列表</el-button>
-    <el-radio v-model="listType"
-              label="ol">有序</el-radio>
-    <el-radio v-model="listType"
-              label="ul">无序</el-radio>
-
-    <el-button type="text"
-               size="small"
-               @click="addMark('fig')">+ 图片</el-button>
-    <a href="https://www.latex-tables.com/#"
-       target="_blank">表格</a>
-    <el-button type="text"
-               size="small"
-               @click="addMark('opt')">+ 选项</el-button>
-    <el-button type="text"
-               size="small"
-               @click="addMark('kaishu')">+ 楷书</el-button>
-    <el-button type="text"
-               size="small"
-               @click="addMark('bf')">+ 粗体文本</el-button>
-    <el-button type="text"
-               size="small"
-               @click="test">test</el-button>
-    <el-input v-model="templateName"
-              placeholder="请输入模板名称"></el-input>
-    <el-input type="textarea"
-              id="edit-area"
-              placeholder="请输入内容"
-              v-model="originText"
-              :autosize="{ minRows: 8}"
-              @keydown.tab.native="tabInput($event)"
-              show-word-limit>
-    </el-input>
-    <div class="latex-snippet-wrap">
-      <el-tag v-for="item in snippetStore"
-              class="snippet-item"
-              :key="item.name"
-              @close="deleteSnippet(item.name)"
-              @click="insertSnippet(item.name)"
-              closable>{{'+'+item.name}}</el-tag>
-
-    </div>
-    <el-button type="text"
-               size="small"
-               @click="saveSnippet">保存当前编辑区为新片段</el-button>
-    <el-button type="text"
-               size="small"
-               @click="latexCode = ''">清空</el-button>
-    <el-input v-model="snippetName"
-              placeholder="请输入片段名称"></el-input>
-    <el-input type="textarea"
-              id="preview-area"
-              placeholder="预览"
-              v-model="latexCode"
-              :autosize="{ minRows: 8}"
-              @keydown.tab.native="tabInput($event)"
-              show-word-limit>
-    </el-input>
-    <el-button type="text"
-               size="small"
-               @click="copyResult">复制</el-button>
   </div>
 </template>
 
@@ -569,16 +611,67 @@ export default {
 </script>
 
 <style>
+#app section {
+  margin: 10px;
+  border: 1px solid #9d9d9d;
+  padding: 0px 8px 8px 8px;
+  border-radius: 5px;
+}
+#app header {
+  font-size: 40px;
+  font-weight: 800;
+  text-align: center;
+  margin: 10px;
+}
+.region {
+  /* height: 150px; */
+  background: #fff;
+  margin: 10px 0;
+  border: 1px solid #dcdfe6;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+.up-region {
+  padding: 5px 5px 5px 0;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid #dcdfe6;
+}
+.up-region span {
+  padding-left: 5px;
+}
+.down-region {
+  /* overflow: scroll; */
+  padding: 0 5px 0 5px;
+  flex: 1;
+}
+.name-input {
+  display: flex;
+  flex-direction: row;
+}
+.name-input span {
+  font-size: 14px;
+  padding: 5px;
+  width: 70px;
+}
+.name-input .text-area {
+  flex: 1;
+}
+.text-area {
+  /* margin-top: 10px; */
+}
 * {
   margin: 0;
 }
 .templates-wrap,
 .latex-snippet-wrap {
-  padding: 10px;
+  /* padding: 10px; */
 }
 .template-item,
 .snippet-item {
-  /* margin: 0 10px 0 0 !important; */
+  margin: 5px 10px 5px 0 !important;
   cursor: pointer;
 }
 
@@ -600,5 +693,29 @@ export default {
   width: 90px;
   margin-left: 10px;
   vertical-align: bottom;
+}
+
+/* 滚动条的宽度 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+/* 滚动条凹槽的颜色，还可以设置边框属性 */
+::-webkit-scrollbar-track-piece {
+  /* // background-color:#f8f8f8;  // 这个不要更加好看，如果要了这个样式，没有产生滚动条的时候都会有一个框在右侧 */
+  border-radius: 2px;
+}
+
+/* 滚动条的设置 */
+::-webkit-scrollbar-thumb {
+  background-color: #dddddd;
+  background-clip: padding-box;
+  min-height: 28px;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #bbb;
 }
 </style>
