@@ -22,14 +22,30 @@
                  @click="addTemplate">新建模板</el-button>
       <el-button type="primary"
                  size="small"
-                 @click="saveTemplate">保存为模板</el-button>
+                 @click="saveTemplate">保存模板</el-button>
+      <el-popover placement="right"
+                  size="small"
+                  trigger="click">
+        <el-input v-model="newTemplateName"
+                  placeholder="请输入模板名称"></el-input>
+        <el-button type="primary"
+                   size="small"
+                   @click="saveTemplate">确认</el-button>
+        <el-button type="primary"
+                   size="small"
+                   @click="saveTemplate">取消</el-button>
+        <el-button slot="reference">保存当前编辑区为模板</el-button>
+      </el-popover>
     </div>
     <el-button type="primary"
                size="small"
                @click="preview">预览</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark(listType)">列表</el-button>
+               @click="originText = ''">清空</el-button>
+    <el-button type="primary"
+               size="small"
+               @click="addMark(listType)">+ 列表</el-button>
     <el-radio v-model="listType"
               label="ol">有序</el-radio>
     <el-radio v-model="listType"
@@ -37,18 +53,18 @@
 
     <el-button type="primary"
                size="small"
-               @click="addMark('fig')">图片</el-button>
+               @click="addMark('fig')">+ 图片</el-button>
     <a href="https://www.latex-tables.com/#"
        target="_blank">表格</a>
     <el-button type="primary"
                size="small"
-               @click="addMark('opt')">选项</el-button>
+               @click="addMark('opt')">+ 选项</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark('kaishu')">楷书</el-button>
+               @click="addMark('kaishu')">+ 楷书</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark('bf')">粗体文本</el-button>
+               @click="addMark('bf')">+ 粗体文本</el-button>
     <el-button type="primary"
                size="small"
                @click="test">test</el-button>
@@ -177,14 +193,14 @@ export default {
       this.newTemplateName = ''
     },
     saveTemplate() {
-      for (let i = 0; i < this.templateStore.length; i++) {
-        if (this.templateStore[i].name === this.curTemplate) {
-          this.templateStore[i].content = this.originText
-        }
-      }
-      this.$message({
-        type: 'success',
-        message: '保存成功!',
+      // for (let i = 0; i < this.templateStore.length; i++) {
+      //   if (this.templateStore[i].name === this.curTemplate) {
+      //     this.templateStore[i].content = this.originText
+      //   }
+      // }
+      this.templateStore.push({
+        name: this.newTemplateName,
+        content: this.originText,
       })
     },
     /**
