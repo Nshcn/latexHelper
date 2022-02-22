@@ -1,11 +1,35 @@
 <template>
   <div id="app">
+    <div class="templates-wrap">
+      {{curTemplate}}
+      <el-tag v-for="item in templateStore"
+              class="template-item"
+              :key="item.name"
+              @close="deleteTemplate(item.name)"
+              @click="showTemplate(item.name)"
+              closable>{{item.name}}</el-tag>
+      <el-input class="input-new-tag"
+                v-if="inputVisible"
+                v-model="newTemplateName"
+                ref="saveTagInput"
+                size="small"
+                @keyup.enter.native="handleInputConfirm"
+                @blur="handleInputConfirm">
+      </el-input>
+      <el-button v-else
+                 class="button-new-tag"
+                 size="small"
+                 @click="addTemplate">新建模板</el-button>
+      <el-button type="primary"
+                 size="small"
+                 @click="saveTemplate">保存为模板</el-button>
+    </div>
     <el-button type="primary"
                size="small"
                @click="preview">预览</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark(listType)">添加列表</el-button>
+               @click="addMark(listType)">列表</el-button>
     <el-radio v-model="listType"
               label="ol">有序</el-radio>
     <el-radio v-model="listType"
@@ -13,18 +37,18 @@
 
     <el-button type="primary"
                size="small"
-               @click="addMark('fig')">添加图片</el-button>
+               @click="addMark('fig')">图片</el-button>
     <a href="https://www.latex-tables.com/#"
-       target="_blank">添加表格</a>
+       target="_blank">表格</a>
     <el-button type="primary"
                size="small"
-               @click="addMark('opt')">添加选项</el-button>
+               @click="addMark('opt')">选项</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark('kaishu')">添加楷书</el-button>
+               @click="addMark('kaishu')">楷书</el-button>
     <el-button type="primary"
                size="small"
-               @click="addMark('bf')">添加粗体文本</el-button>
+               @click="addMark('bf')">粗体文本</el-button>
     <el-button type="primary"
                size="small"
                @click="test">test</el-button>
@@ -43,6 +67,9 @@
               @keydown.tab.native="tabInput($event)"
               show-word-limit>
     </el-input>
+    <el-button type="primary"
+               size="small"
+               @click="copyResult">复制</el-button>
   </div>
 </template>
 
@@ -53,10 +80,6 @@ export default {
   props: {
     sourceText: String,
   },
-  created() {
-    console.log(this.sourceText)
-    this.originText = this.sourceText
-  },
   watch: {
     sourceText(newValue) {
       this.originText = newValue
@@ -65,9 +88,28 @@ export default {
   data() {
     return {
       originText: '',
+      inputVisible: false,
+      newTemplateName: '',
+      curTemplate: '空白',
       latexCode: '',
       listType: 'ol',
       markTypeArr: ['ol', 'ul', 'fig', 'wfig', 'opt', 'kaishu', 'bf'],
+      templateStore: [
+        {
+          name: '空白',
+          content: '',
+        },
+        {
+          name: '选择题',
+          content:
+            '【题目】\n\n/opt\n\n/\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n/ol\n\n/\n【对命制练习题的启发】\n/ol\n\n/\n',
+        },
+        {
+          name: '大题',
+          content:
+            '【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n/ol\n\n/\n【对命制练习题的启发】\n/ol\n\n/\n',
+        },
+      ],
     }
   },
   methods: {
@@ -75,21 +117,87 @@ export default {
       let dom = document.getElementById('edit-area')
       dom.value =
         dom.value.substring(0, dom.selectionStart) +
-        `\n#${type}\n\n#\n` +
+        `\n/${type}\n\n/\n` +
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
-
+    showTemplate(templateName) {
+      this.curTemplate = templateName
+      for (let item of this.templateStore) {
+        if (item.name === templateName) {
+          this.originText = item.content
+          return
+        }
+      }
+    },
+    deleteTemplate(templateName) {
+      for (let i = 0; i < this.templateStore.length; i++) {
+        if (this.templateStore[i].name === templateName) {
+          this.$confirm(
+            `此操作将永久删除"${templateName}"模板, 是否继续?`,
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }
+          )
+            .then(() => {
+              this.templateStore.splice(i, 1)
+              this.$message({
+                type: 'success',
+                message: '删除成功!',
+              })
+              return
+            })
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除',
+              })
+              return
+            })
+        }
+      }
+    },
+    addTemplate() {
+      this.inputVisible = true
+      this.$nextTick(() => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+    handleInputConfirm() {
+      let newTemplateName = this.newTemplateName
+      if (newTemplateName) {
+        this.templateStore.push({
+          name: newTemplateName,
+          content: '',
+        })
+      }
+      this.inputVisible = false
+      this.newTemplateName = ''
+    },
+    saveTemplate() {
+      for (let i = 0; i < this.templateStore.length; i++) {
+        if (this.templateStore[i].name === this.curTemplate) {
+          this.templateStore[i].content = this.originText
+        }
+      }
+      this.$message({
+        type: 'success',
+        message: '保存成功!',
+      })
+    },
     /**
      * 预览
      */
     preview() {
       let result =
-        this.originText[this.originText.length - 1] === '#'
+        this.originText[this.originText.length - 1] === '/'
           ? this.originText
-          : this.originText + '\n#'
+          : this.originText + '\n/'
       for (let markType of this.markTypeArr) {
         let regStr = new RegExp(
-          '(?<=(#' + markType + '\\s))[\\s\\S*]+?(?=#)',
+          '(?<=(/' + markType + '\\s))[\\s\\S*]+?(?=/)',
           'gm'
         )
         result = result.replace(regStr, (item) => {
@@ -97,7 +205,7 @@ export default {
         })
       }
       // 去除所有mark
-      result = result.replace(/^#.{0,}/gm, () => {
+      result = result.replace(/^\/.{0,}/gm, () => {
         return ''
       })
       this.latexCode = result
@@ -262,9 +370,60 @@ export default {
       elInput.selectionEnd = startPos + insertText.length
       this.inputValue = elInput.value
     },
+    copyResult() {
+      let content = this.latexCode
+      if (navigator.clipboard) {
+        // clipboard api 复制
+        navigator.clipboard.writeText(content)
+      } else {
+        var textarea = document.createElement('textarea')
+        document.body.appendChild(textarea)
+        // 隐藏此输入框
+        textarea.style.position = 'fixed'
+        textarea.style.clip = 'rect(0 0 0 0)'
+        textarea.style.top = '10px'
+        // 赋值
+        textarea.value = content
+        // 选中
+        textarea.select()
+        // 复制
+        document.execCommand('copy', true)
+        // 移除输入框
+        document.body.removeChild(textarea)
+      }
+      this.$message({
+        message: '复制成功',
+        type: 'success',
+      })
+    },
   },
 }
 </script>
 
 <style>
+* {
+  margin: 0;
+}
+.templates-wrap {
+  padding: 10px;
+}
+.template-item {
+  cursor: pointer;
+}
+
+.el-tag + .el-tag {
+  margin-left: 10px;
+}
+.button-new-tag {
+  margin-left: 10px;
+  height: 32px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.input-new-tag {
+  width: 90px;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
 </style>
