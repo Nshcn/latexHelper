@@ -55,7 +55,25 @@
               @keydown.tab.native="tabInput($event)"
               show-word-limit>
     </el-input>
+    <div class="latex-snippet-wrap">
+      <el-tag v-for="item in snippetStore"
+              class="snippet-item"
+              :key="item.name"
+              @close="deleteSnippet(item.name)"
+              @click="insertSnippet(item.name)"
+              closable>{{'+'+item.name}}</el-tag>
+
+    </div>
+    <el-button type="text"
+               size="small"
+               @click="saveSnippet">保存当前编辑区为新片段</el-button>
+    <el-button type="text"
+               size="small"
+               @click="latexCode = ''">清空</el-button>
+    <el-input v-model="snippetName"
+              placeholder="请输入片段名称"></el-input>
     <el-input type="textarea"
+              id="preview-area"
               placeholder="预览"
               v-model="latexCode"
               :autosize="{ minRows: 8}"
@@ -69,26 +87,67 @@
 </template>
 
 <script>
+import storage from '@/utils/storage'
+
 export default {
   name: 'Edit',
   components: {},
-  props: {
-    sourceText: String,
-  },
   watch: {
-    sourceText(newValue) {
-      this.originText = newValue
+    templateStore: {
+      handler(newValue) {
+        storage.setItem({
+          value: newValue,
+          name: 'templateStore',
+        })
+      },
+      deep: true,
     },
+    snippetStore: {
+      handler(newValue) {
+        storage.setItem({
+          value: newValue,
+          name: 'snippetStore',
+        })
+      },
+      deep: true,
+    },
+  },
+  created() {
+    let localTemplateStore = storage.getItem('templateStore')
+    if (localTemplateStore) {
+      this.templateStore = localTemplateStore
+    } else {
+      storage.setItem({
+        value: this.templateStore,
+        name: 'templateStore',
+      })
+    }
+
+    let localSnippetStore = storage.getItem('snippetStore')
+    if (localSnippetStore) {
+      this.snippetStore = localSnippetStore
+    } else {
+      storage.setItem({
+        value: this.snippetStore,
+        name: 'snippetStore',
+      })
+    }
   },
   data() {
     return {
       originText: '',
       inputVisible: false,
       templateName: '',
-      curTemplate: '空白',
+      snippetName: '',
       latexCode: '',
       listType: 'ol',
       markTypeArr: ['ol', 'ul', 'fig', 'wfig', 'opt', 'kaishu', 'bf'],
+      snippetStore: [
+        {
+          name: '表格',
+          content: '【表格】,fdskjkjsfdjsdkafds\nfjdklsjfl\njfkdjsk',
+        },
+      ],
       templateStore: [
         {
           name: '空白',
@@ -116,11 +175,29 @@ export default {
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
     showTemplate(templateName) {
-      this.templateName = templateName
-      for (let item of this.templateStore) {
-        if (item.name === templateName) {
-          this.originText = item.content
-          return
+      if (this.originText.trim() !== '') {
+        this.$confirm(`切换模板会清空编辑区, 是否继续?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => {
+            this.templateName = templateName
+            for (let item of this.templateStore) {
+              if (item.name === templateName) {
+                this.originText = item.content
+                return
+              }
+            }
+          })
+          .catch(() => {})
+      } else {
+        this.templateName = templateName
+        for (let item of this.templateStore) {
+          if (item.name === templateName) {
+            this.originText = item.content
+            return
+          }
         }
       }
     },
@@ -178,6 +255,7 @@ export default {
         })
           .then(() => {
             this.templateStore[repeatIndex].content = this.originText
+            console.log(this.templateStore)
             this.$message({
               type: 'success',
               message: '覆盖成功!',
@@ -275,6 +353,7 @@ export default {
         `\t\\includegraphics[width=0.8\\textwidth]{${figName}.png}\n` +
         `\t\\caption{${figName}}\n` +
         `\t\\label{fig:${figName}}\n` +
+        `\t%\\ref{fig:${figName}}\n` +
         '\\end{figure}\n'
       )
     },
@@ -286,6 +365,7 @@ export default {
         `\t\\includegraphics[width=0.8\\textwidth]{${figName}.png}\n` +
         `\t\\caption{${figName}}\n` +
         `\t\\label{fig:${figName}}\n` +
+        `\t%\\ref{fig:${figName}}\n` +
         '\\end{wrapfigure}\n'
       )
     },
@@ -357,10 +437,7 @@ export default {
     },
 
     test() {
-      let str =
-        '翻*领狂单J*S莱肯发范定龙*江了赛季浮动*茯苓丹发浮动浮动发腮动发腮发龙家店发腮'
-      let res = this.parseInlineText(str)
-      console.log(res)
+      this.insertSnippet('fd')
     },
 
     // textarea输入tab制表符
@@ -405,6 +482,88 @@ export default {
         type: 'success',
       })
     },
+
+    deleteSnippet(snippetName) {
+      for (let i = 0; i < this.snippetStore.length; i++) {
+        if (this.snippetStore[i].name === snippetName) {
+          this.$confirm(
+            `此操作将永久删除"${snippetName}"片段, 是否继续?`,
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }
+          )
+            .then(() => {
+              this.snippetStore.splice(i, 1)
+              this.$message({
+                type: 'success',
+                message: '删除成功!',
+              })
+              return
+            })
+            .catch(() => {})
+        }
+      }
+    },
+
+    insertSnippet(snippetName) {
+      this.snippetName = snippetName
+      let dom = document.getElementById('preview-area')
+      let index = this.snippetStore.findIndex((item) => {
+        return item.name === snippetName
+      })
+      let snippetContent = this.snippetStore[index].content
+      dom.value =
+        dom.value.substring(0, dom.selectionStart) +
+        `\n${snippetContent}\n` +
+        dom.value.substring(dom.selectionEnd, dom.textLength)
+    },
+
+    saveSnippet() {
+      if (this.snippetName === '') {
+        this.$message({
+          type: 'warning',
+          message: '请输入模板名称',
+        })
+        return
+      }
+      if (this.latexCode === '') {
+        this.$message({
+          type: 'warning',
+          message: '编辑区为空',
+        })
+        return
+      }
+      let repeatIndex = this.snippetStore.findIndex((item) => {
+        return item.name === this.snippetName
+      })
+      if (repeatIndex !== -1) {
+        this.$confirm(`"${this.snippetName}"片段已存在, 是否覆盖?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => {
+            this.snippetStore[repeatIndex].content = this.latexCode
+            this.$message({
+              type: 'success',
+              message: '覆盖成功!',
+            })
+          })
+          .catch(() => {})
+      } else {
+        this.snippetStore.push({
+          name: this.snippetName,
+          content: this.latexCode,
+        })
+        this.$message({
+          type: 'success',
+          message: '保存成功',
+        })
+      }
+    },
   },
 }
 </script>
@@ -413,10 +572,12 @@ export default {
 * {
   margin: 0;
 }
-.templates-wrap {
+.templates-wrap,
+.latex-snippet-wrap {
   padding: 10px;
 }
-.template-item {
+.template-item,
+.snippet-item {
   /* margin: 0 10px 0 0 !important; */
   cursor: pointer;
 }
