@@ -45,7 +45,7 @@
                    @click="addMark('kaishu')"><i class="el-icon-plus" />楷书</el-button>
         <el-button type="text"
                    size="small"
-                   @click="addMark('bf')"><i class="el-icon-plus" />粗体文本</el-button>
+                   @click="addMark('bf')"><i class="el-icon-plus" />粗体</el-button>
         <el-tooltip content="latex-tables.com"
                     placement="right">
           <el-button type="text"
@@ -180,11 +180,11 @@ export default {
         },
         {
           name: '选择题',
-          content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         },
         {
           name: '大题',
-          content: `【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         }
       )
       storage.setItem({
@@ -382,7 +382,7 @@ export default {
         })
       }
       // 去除所有mark
-      // TODO:
+      // TODO: 自定义符号替换#
       result = result.replace(/^#.{0,}/gm, () => {
         return ''
       })
@@ -481,7 +481,7 @@ export default {
       // 去除-
       content = content.replace(/^-[\s]{0,}/, '')
       // 粗体
-      let regStrBf = /\*.{2,15}?\*/
+      let regStrBf = /\*.{2,16}?\*/
       while (regStrBf.test(content)) {
         content = content.replace(regStrBf, (item) => {
           return `{\\bf ${item.slice(1, -1)}}`
@@ -489,7 +489,7 @@ export default {
         console.log(content)
       }
       // 楷体
-      let regStrKaishu = /=.{2,15}?=/
+      let regStrKaishu = /=.{2,16}?=/
       while (regStrKaishu.test(content)) {
         content = content.replace(regStrKaishu, (item) => {
           return `{\\kaishu ${item.slice(1, -1)}}`
@@ -546,7 +546,7 @@ export default {
       this.inputValue = elInput.value
     },
     copyResult() {
-      let content = this.latexCode
+      let content = '\n' + this.latexCode.trim() + '\n'
       if (navigator.clipboard) {
         // clipboard api 复制
         navigator.clipboard.writeText(content)
