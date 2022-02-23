@@ -49,6 +49,10 @@ bbb
 #fig
 图片名字
 #
+
+#wfig
+图片名字
+#
 ```
 
 ```latex
@@ -59,6 +63,14 @@ bbb
 	\label{fig:图片名字}
 	%\ref{fig:图片名字}
 \end{figure}
+
+\begin{wrapfigure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{图片名字.png}
+	\caption{图片名字}
+	\label{fig:图片名字}
+	%\ref{fig:图片名字}
+\end{wrapfigure}
 ```
 
 #### `kaishu`：楷体文字片段
@@ -104,7 +116,7 @@ latexHelper 会自动去除掉选项前的 A,B,C,D,-等前缀
 {333}
 ```
 
-latexHelper 会根据最长选项的长度来判断将选项设置为几行合适。
+latexHelper 会根据最长选项的长度来设置合适的选项行数。
 
 #### 行内文字处理
 
@@ -151,4 +163,5 @@ ccc
 ## 开发计划
 
 - 支持多重嵌套列表
-- 自定义标记符
+- 支持自定义标记符
+- 支持更多 latex 语法
