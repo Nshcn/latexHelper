@@ -327,10 +327,17 @@ export default {
      * 预览
      */
     preview() {
-      let result =
-        this.originText[this.originText.length - 1] === '/'
-          ? this.originText
-          : this.originText + '\n/'
+      // 先处理每行的特殊符号 * = -
+      let result = this.originText
+        .trim()
+        .split('\n')
+        .map((line) => {
+          return this.parseInlineText(line)
+        })
+        .join('\n')
+      // 补上末尾的斜杠
+      result = result[result.length - 1] === '/' ? result : result + '\n/'
+      // 依次处理各个模块
       for (let markType of this.markTypeArr) {
         let regStr = new RegExp(
           '(?<=(/' + markType + '\\s))[\\s\\S*]+?(?=/)',
@@ -375,7 +382,7 @@ export default {
       let list = content.split('\n')
       let result = '\\begin{enumerate}[leftmargin=2\\parindent]'
       for (let item of list) {
-        result += `\n\t\\item ${this.parseInlineText(item)}`
+        result += `\n\t\\item${item}`
       }
       result += '\n\\end{enumerate}\n'
       return result
@@ -387,7 +394,7 @@ export default {
       let list = content.split('\n')
       let result = '\\begin{itemize}[leftmargin=2\\parindent]'
       for (let item of list) {
-        result += `\n\t\\item ${this.parseInlineText(item)}`
+        result += `\n\t\\item ${item}`
       }
       result += '\n\\end{itemize}\n'
       return result
@@ -424,7 +431,7 @@ export default {
      */
     parseKaishu(content) {
       console.log(content)
-      return `{\\kaishu\n${this.parseInlineText(content)}\n}\n`
+      return `{\\kaishu\n${content}\n}\n`
     },
     /**
      * 处理单行粗体
