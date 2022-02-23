@@ -174,6 +174,20 @@ export default {
     if (localTemplateStore) {
       this.templateStore = localTemplateStore
     } else {
+      this.templateStore.push(
+        {
+          name: '空白',
+          content: '',
+        },
+        {
+          name: '选择题',
+          content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+        },
+        {
+          name: '大题',
+          content: `【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+        }
+      )
       storage.setItem({
         value: this.templateStore,
         name: 'templateStore',
@@ -197,6 +211,7 @@ export default {
       templateName: '',
       snippetName: '',
       listType: 'ol',
+      ms: '#', // markSymbol 自定义标记符号
       markTypeArr: ['ol', 'ul', 'fig', 'wfig', 'opt', 'kaishu', 'bf'],
       snippetStore: [
         {
@@ -215,20 +230,18 @@ export default {
         },
       ],
       templateStore: [
-        {
-          name: '空白',
-          content: '',
-        },
-        {
-          name: '选择题',
-          content:
-            '【题目】\n\n/opt\n\n/\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n/ol\n\n/\n【对命制练习题的启发】\n/ol\n\n/\n',
-        },
-        {
-          name: '大题',
-          content:
-            '【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n/ol\n\n/\n【对命制练习题的启发】\n/ol\n\n/\n',
-        },
+        // {
+        //   name: '空白',
+        //   content: '',
+        // },
+        // {
+        //   name: '选择题',
+        //   content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+        // },
+        // {
+        //   name: '大题',
+        //   content: `【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+        // },
       ],
     }
   },
@@ -237,7 +250,7 @@ export default {
       let dom = document.getElementById('edit-area')
       dom.value =
         dom.value.substring(0, dom.selectionStart) +
-        `\n/${type}\n\n/\n` +
+        `\n${this.ms + type}\n\n${this.ms}\n` +
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
     showTemplate(templateName) {
@@ -357,11 +370,12 @@ export default {
         })
         .join('\n')
       // 补上末尾的斜杠
-      result = result[result.length - 1] === '/' ? result : result + '\n/'
+      result =
+        result[result.length - 1] === this.ms ? result : result + '\n' + this.ms
       // 依次处理各个模块
       for (let markType of this.markTypeArr) {
         let regStr = new RegExp(
-          '(?<=(/' + markType + '\\s))[\\s\\S*]+?(?=/)',
+          `(?<=(${this.ms + markType}\\s))[\\s\\S*]+?(?=${this.ms})`,
           'gm'
         )
         result = result.replace(regStr, (item) => {
@@ -369,7 +383,8 @@ export default {
         })
       }
       // 去除所有mark
-      result = result.replace(/^\/.{0,}/gm, () => {
+      // TODO:
+      result = result.replace(/^#.{0,}/gm, () => {
         return ''
       })
       this.latexCode = result
@@ -403,7 +418,7 @@ export default {
       let list = content.split('\n')
       let result = '\\begin{enumerate}[leftmargin=2\\parindent]'
       for (let item of list) {
-        result += `\n\t\\item${item}`
+        result += `\n\t\\item ${item}`
       }
       result += '\n\\end{enumerate}\n'
       return result
