@@ -33,24 +33,40 @@
       <div class="insert-btn">
         <el-button type="text"
                    size="small"
-                   @click="addMark(listType)"><i class="el-icon-plus" />列表</el-button>
+                   @click="addMark(listType)">
+          <i class="el-icon-circle-plus-outline" />
+          列表
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="addMark('fig')"><i class="el-icon-plus" />图片</el-button>
+                   @click="addMark('fig')">
+          <i class="el-icon-circle-plus-outline" />
+          图片
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="addMark('opt')"><i class="el-icon-plus" />选项</el-button>
+                   @click="addMark('opt')">
+          <i class="el-icon-circle-plus-outline" />
+          选项
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="addMark('kaishu')"><i class="el-icon-plus" />楷书</el-button>
+                   @click="addMark('kaishu')">
+          <i class="el-icon-circle-plus-outline" />
+          楷书
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="addMark('bf')"><i class="el-icon-plus" />粗体</el-button>
+                   @click="addMark('bf')">
+          <i class="el-icon-circle-plus-outline" />
+          粗体
+        </el-button>
         <el-tooltip content="latex-tables.com"
                     placement="right">
           <el-button type="text"
                      size="small"
                      onclick="window.open('https://www.latex-tables.com/#')">
+            <i class="el-icon-circle-plus-outline" />
             表格
           </el-button>
         </el-tooltip>
@@ -64,16 +80,25 @@
       <div class="operate-area">
         <el-button type="text"
                    size="small"
-                   @click="saveTemplate">保存当前编辑区为新模板</el-button>
+                   @click="saveTemplate">
+          <i class="el-icon-circle-plus-outline" />
+          保存当前编辑区为新模板
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="originText = ''">清空</el-button>
+                   @click="originText = ''">
+          <i class="el-icon-delete" />
+          清空
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="preview">生成latex</el-button>
-        <!-- <el-button type="text"
+                   @click="preview">
+          <i class="el-icon-refresh" />
+          生成latex
+        </el-button>
+        <el-button type="text"
                    size="small"
-                   @click="test">test</el-button> -->
+                   @click="test">test</el-button>
       </div>
       <el-input type="textarea"
                 class="text-area"
@@ -121,16 +146,26 @@
       <div class="operate-area">
         <el-button type="text"
                    size="small"
-                   @click="saveSnippet">保存当前编辑区为新片段</el-button>
+                   @click="saveSnippet">
+          <i class="el-icon-circle-plus-outline" />
+          保存当前编辑区为新片段
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="clear('latex')">清空</el-button>
+                   @click="clear('latex')">
+          <i class="el-icon-delete" />
+          清空
+        </el-button>
         <el-button type="text"
                    size="small"
-                   @click="copyResult">复制</el-button>
+                   @click="copyResult">
+          <i class="el-icon-document-copy" />
+          复制
+        </el-button>
       </div>
       <el-input type="textarea"
                 class="text-area"
+                :class="{active:isActive}"
                 id="preview-area"
                 placeholder="预览"
                 v-model="latexCode"
@@ -175,10 +210,6 @@ export default {
     } else {
       this.templateStore.push(
         {
-          name: '空白',
-          content: '',
-        },
-        {
           name: '选择题',
           content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         },
@@ -205,6 +236,7 @@ export default {
   },
   data() {
     return {
+      isActive: false, // 预览区是否激活
       originText: '', // 源码
       latexCode: '', // latex
       templateName: '',
@@ -353,8 +385,7 @@ export default {
     },
 
     test() {
-      let res = this.originText.match(/\/ul[\s\S*]+\//)
-      console.log(res)
+      this.isActive = true
     },
     /**
      * 预览
@@ -713,8 +744,10 @@ export default {
 .name-input .text-area {
   flex: 1;
 }
-.text-area {
-  /* margin-top: 10px; */
+
+#edit-area,
+#preview-area {
+  font-family: consolas;
 }
 * {
   margin: 0;
@@ -729,7 +762,7 @@ export default {
   cursor: pointer;
 }
 
-.active {
+.active #preview-area {
   background: black !important;
 }
 
