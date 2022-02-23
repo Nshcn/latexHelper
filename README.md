@@ -2,6 +2,8 @@
 
 latexHelper 是一个可以简化一些特定 latex 代码语法的工具，通过一些简单的语法代码生成其对应的 latex 语法，让作者更专注于写作本身。
 
+![image](https://github.com/Nshcn/latexHelper/blob/main/img/latexHelper.gif)
+
 ## 使用方法
 
 latexHelper 默认通过在行首的`#`作为标记符号，在两个行首的`#`之间书写文字内容。
