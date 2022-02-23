@@ -34,15 +34,9 @@
         <el-button type="text"
                    size="small"
                    @click="addMark(listType)"><i class="el-icon-plus" />列表</el-button>
-        <!-- <el-radio v-model="listType"
-                  label="ol">有序</el-radio>
-        <el-radio v-model="listType"
-                  label="ul">无序</el-radio> -->
         <el-button type="text"
                    size="small"
                    @click="addMark('fig')"><i class="el-icon-plus" />图片</el-button>
-        <!-- <a href="https://www.latex-tables.com/#"
-           target="_blank">表格</a> -->
         <el-button type="text"
                    size="small"
                    @click="addMark('opt')"><i class="el-icon-plus" />选项</el-button>
@@ -52,6 +46,14 @@
         <el-button type="text"
                    size="small"
                    @click="addMark('bf')"><i class="el-icon-plus" />粗体文本</el-button>
+        <el-tooltip content="latex-tables.com"
+                    placement="right">
+          <el-button type="text"
+                     size="small"
+                     onclick="window.open('https://www.latex-tables.com/#')">
+            表格
+          </el-button>
+        </el-tooltip>
       </div>
       <div class="name-input">
         <span>模板名称</span>
@@ -479,15 +481,16 @@ export default {
       // 去除-
       content = content.replace(/^-[\s]{0,}/, '')
       // 粗体
-      let regStrBf = /\*.{2,8}\*/
-      while (/\*.{2,8}\*/.test(content)) {
+      let regStrBf = /\*.{2,15}?\*/
+      while (regStrBf.test(content)) {
         content = content.replace(regStrBf, (item) => {
           return `{\\bf ${item.slice(1, -1)}}`
         })
+        console.log(content)
       }
       // 楷体
-      let regStrKaishu = /=.{2,8}=/
-      while (/=.{2,8}=/.test(content)) {
+      let regStrKaishu = /=.{2,15}?=/
+      while (regStrKaishu.test(content)) {
         content = content.replace(regStrKaishu, (item) => {
           return `{\\kaishu ${item.slice(1, -1)}}`
         })
