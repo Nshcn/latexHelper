@@ -1,6 +1,11 @@
 <template>
   <div id="app">
-    <header>latexHelper</header>
+    <header>
+      <el-tooltip content="点击跳转到帮助文档"
+                  placement="right">
+        <span onclick="window.open('https://github.com/Nshcn/latexHelper')">latexHelper</span>
+      </el-tooltip>
+    </header>
     <section class="origin-section">
       <div class="templates-wrap wrap">
         <div class="region">
@@ -63,10 +68,13 @@
                    @click="saveTemplate">保存当前编辑区为新模板</el-button>
         <el-button type="text"
                    size="small"
+                   @click="originText = ''">清空</el-button>
+        <el-button type="text"
+                   size="small"
                    @click="preview">生成latex</el-button>
         <el-button type="text"
                    size="small"
-                   @click="originText = ''">清空</el-button>
+                   @click="test">test</el-button>
       </div>
       <el-input type="textarea"
                 class="text-area"
@@ -192,8 +200,18 @@ export default {
       markTypeArr: ['ol', 'ul', 'fig', 'wfig', 'opt', 'kaishu', 'bf'],
       snippetStore: [
         {
-          name: '表格',
-          content: '【表格】,fdskjkjsfdjsdkafds\nfjdklsjfl\njfkdjsk',
+          name: '图片并排',
+          content:
+            '\n\\begin{figure}[ht]\n    \\centering\n    \\subfigure[test]{\n        \\begin{tikzpicture}[xscale=0.16]\n\n        \\end{tikzpicture}\n    }\n    \\subfigure[test]{\n        \\begin{tikzpicture}[xscale=0.16]\n\n        \\end{tikzpicture}\n    }\n    \\subfigure[test]{\n        \\begin{tikzpicture}[xscale=0.16]\n         \n        \\end{tikzpicture}\n    }\n    \\caption{test}\n    \\label{fig:test}\n\\end{figure}\n',
+        },
+        {
+          name: '图片靠右',
+          content:
+            '\n\\begin{wrapfigure}[5]{r}{180pt}\n    \\begin{tikzpicture}\n        \n    \\end{tikzpicture}\n    \\caption{图片名}\n    \\label{fig:标签}\n\\end{wrapfigure}\n',
+        },
+        {
+          name: '公式',
+          content: '\\[\n    \\mathbf{}\n\\]',
         },
       ],
       templateStore: [
@@ -320,6 +338,11 @@ export default {
           message: '模板保存成功',
         })
       }
+    },
+
+    test() {
+      let res = this.originText.match(/\/ul[\s\S*]+\//)
+      console.log(res)
     },
     /**
      * 预览
@@ -491,10 +514,6 @@ export default {
       return strArray[0].length
     },
 
-    test() {
-      this.insertSnippet('fd')
-    },
-
     // textarea输入tab制表符
     tabInput(e) {
       e.preventDefault()
@@ -639,6 +658,9 @@ export default {
   font-weight: 800;
   text-align: center;
   margin: 10px;
+}
+#app header span {
+  cursor: pointer;
 }
 .region {
   /* height: 150px; */
