@@ -181,11 +181,11 @@ export default {
         },
         {
           name: '选择题',
-          content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+          content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         },
         {
           name: '大题',
-          content: `【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
+          content: `【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         }
       )
       storage.setItem({
