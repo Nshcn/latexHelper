@@ -52,9 +52,6 @@
         <el-button type="text"
                    size="small"
                    @click="addMark('bf')"><i class="el-icon-plus" />粗体文本</el-button>
-        <!-- <el-button type="text"
-                   size="small"
-                   @click="test">test</el-button> -->
       </div>
       <div class="name-input">
         <span>模板名称</span>
@@ -72,9 +69,9 @@
         <el-button type="text"
                    size="small"
                    @click="preview">生成latex</el-button>
-        <el-button type="text"
+        <!-- <el-button type="text"
                    size="small"
-                   @click="test">test</el-button>
+                   @click="test">test</el-button> -->
       </div>
       <el-input type="textarea"
                 class="text-area"
