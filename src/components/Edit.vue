@@ -117,7 +117,7 @@
                    @click="saveSnippet">保存当前编辑区为新片段</el-button>
         <el-button type="text"
                    size="small"
-                   @click="latexCode = ''">清空</el-button>
+                   @click="clear('latex')">清空</el-button>
         <el-button type="text"
                    size="small"
                    @click="copyResult">复制</el-button>
@@ -132,7 +132,6 @@
                 show-word-limit>
       </el-input>
     </section>
-
   </div>
 </template>
 
@@ -185,11 +184,10 @@ export default {
   },
   data() {
     return {
-      originText: '',
-      inputVisible: false,
+      originText: '', // 源码
+      latexCode: '', // latex
       templateName: '',
       snippetName: '',
-      latexCode: '',
       listType: 'ol',
       markTypeArr: ['ol', 'ul', 'fig', 'wfig', 'opt', 'kaishu', 'bf'],
       snippetStore: [
@@ -572,7 +570,7 @@ export default {
         return item.name === snippetName
       })
       let snippetContent = this.snippetStore[index].content
-      dom.value =
+      this.latexCode =
         dom.value.substring(0, dom.selectionStart) +
         `\n${snippetContent}\n` +
         dom.value.substring(dom.selectionEnd, dom.textLength)
@@ -620,6 +618,10 @@ export default {
           message: 'Latex片段保存成功',
         })
       }
+    },
+
+    clear() {
+      this.latexCode = ''
     },
   },
 }
