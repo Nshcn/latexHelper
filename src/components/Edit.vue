@@ -279,7 +279,7 @@ export default {
   methods: {
     addMark(type) {
       let dom = document.getElementById('edit-area')
-      dom.value =
+      this.originText =
         dom.value.substring(0, dom.selectionStart) +
         `\n${this.ms + type}\n\n${this.ms}\n` +
         dom.value.substring(dom.selectionEnd, dom.textLength)
@@ -493,14 +493,14 @@ export default {
       )
     },
     /**
-     * 处理楷书模块
+     * 处理多行楷体
      */
     parseKaishu(content) {
       console.log(content)
       return `{\\kaishu\n${content}\n}\n`
     },
     /**
-     * 处理单行粗体
+     * 处理多行粗体
      */
     parseBf(content) {
       return `{\\bf ${content}}\n`
@@ -517,7 +517,6 @@ export default {
         content = content.replace(regStrBf, (item) => {
           return `{\\bf ${item.slice(1, -1)}}`
         })
-        console.log(content)
       }
       // 楷体
       let regStrKaishu = /=.{2,}?=/
