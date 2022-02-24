@@ -512,7 +512,7 @@ export default {
       // 去除-
       content = content.replace(/^-[\s]{0,}/, '')
       // 粗体
-      let regStrBf = /\*.{2,16}?\*/
+      let regStrBf = /\*.{2,}?\*/
       while (regStrBf.test(content)) {
         content = content.replace(regStrBf, (item) => {
           return `{\\bf ${item.slice(1, -1)}}`
@@ -520,7 +520,7 @@ export default {
         console.log(content)
       }
       // 楷体
-      let regStrKaishu = /=.{2,16}?=/
+      let regStrKaishu = /=.{2,}?=/
       while (regStrKaishu.test(content)) {
         content = content.replace(regStrKaishu, (item) => {
           return `{\\kaishu ${item.slice(1, -1)}}`
