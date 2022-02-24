@@ -143,6 +143,36 @@
                   size="small"
                   placeholder="请输入片段名称"></el-input>
       </div>
+      <el-button type="text"
+                 size="small"
+                 @click="convertToLatex('ol')">
+        <i class="el-icon-magic-stick" />
+        有序列表
+      </el-button>
+      <el-button type="text"
+                 size="small"
+                 @click="convertToLatex('ul')">
+        <i class="el-icon-magic-stick" />
+        无序列表
+      </el-button>
+      <el-button type="text"
+                 size="small"
+                 @click="convertToLatex('kaishu')">
+        <i class="el-icon-magic-stick" />
+        楷体
+      </el-button>
+      <el-button type="text"
+                 size="small"
+                 @click="convertToLatex('bf')">
+        <i class="el-icon-magic-stick" />
+        加粗
+      </el-button>
+      <el-button type="text"
+                 size="small"
+                 @click="convertToLatex('fig')">
+        <i class="el-icon-magic-stick" />
+        图片
+      </el-button>
       <div class="operate-area">
         <el-button type="text"
                    size="small"
@@ -448,7 +478,7 @@ export default {
       let list = content.split('\n')
       let result = '\\begin{enumerate}[leftmargin=2\\parindent]'
       for (let item of list) {
-        result += `\n\t\\item ${item}`
+        result += item.trim()[0] === '\\' ? `\n\t${item}` : `\n\t\\item ${item}`
       }
       result += '\n\\end{enumerate}\n'
       return result
@@ -460,7 +490,7 @@ export default {
       let list = content.split('\n')
       let result = '\\begin{itemize}[leftmargin=2\\parindent]'
       for (let item of list) {
-        result += `\n\t\\item ${item}`
+        result += item.trim()[0] === '\\' ? `\n\t${item}` : `\n\t\\item ${item}`
       }
       result += '\n\\end{itemize}\n'
       return result
@@ -496,8 +526,7 @@ export default {
      * 处理多行楷体
      */
     parseKaishu(content) {
-      console.log(content)
-      return `{\\kaishu\n${content}\n}\n`
+      return `{\\kaishu ${content}}\n`
     },
     /**
      * 处理多行粗体
@@ -686,6 +715,15 @@ export default {
 
     clear() {
       this.latexCode = ''
+    },
+
+    convertToLatex(type) {
+      let dom = document.getElementById('preview-area')
+      let selectText = dom.value.substring(dom.selectionStart, dom.selectionEnd)
+      this.latexCode =
+        dom.value.substring(0, dom.selectionStart) +
+        this.parseSingleType(type)(selectText) +
+        dom.value.substring(dom.selectionEnd, dom.textLength)
     },
   },
 }
