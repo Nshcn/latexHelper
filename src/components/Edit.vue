@@ -573,10 +573,9 @@ export default {
       return (
         '\\begin{wrapfigure}[ht]\n' +
         '\t\\centering\n' +
-        `\t\\includegraphics[width=0.8\\textwidth]{${figName}.png}\n` +
+        `\t\\includegraphics[width=0.8\\textwidth]{图片路径.png}\n` +
         `\t\\caption{${figName}}\n` +
-        `\t\\label{fig:${figName}}\n` +
-        `\t%\\ref{fig:${figName}}\n` +
+        `\t\\label{fig:${figName}}%\\ref{fig:${figName}}\n` +
         '\\end{wrapfigure}\n'
       )
     },
@@ -584,13 +583,13 @@ export default {
      * 处理多行楷体
      */
     parseKaishu(content) {
-      return `{\\kaishu ${content}}\n`
+      return `{\\kaishu ${content}}`
     },
     /**
      * 处理多行粗体
      */
     parseBf(content) {
-      return `{\\bf ${content}}\n`
+      return `{\\bf ${content}}`
     },
     /**
      * 处理行内文字
@@ -624,7 +623,7 @@ export default {
             `\t\\caption{${name}}\n` +
             `\t\\label{fig:${name}}\n` +
             `\t%\\ref{fig:${name}}\n` +
-            '\\end{pfigure}\n'
+            '\\end{figure}\n'
           )
         }
       }
