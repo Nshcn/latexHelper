@@ -561,11 +561,11 @@ export default {
     },
     // 提取图片名字和路径
     getFigName(content) {
-      let match = content.match(/^\[.+\]/gm)
+      let match = content.match(/[[【].+[\]】]/gm)
       return match ? match[0].slice(1, -1) : ''
     },
     getFigPath(content) {
-      let match = content.match(/\(.+\)/gm)
+      let match = content.match(/[(（].+[)）]/gm)
       return match ? match[0].slice(1, -1) : ''
     },
     parseWrapFigure(content) {
@@ -611,6 +611,22 @@ export default {
         content = content.replace(regStrKaishu, (item) => {
           return `{\\kaishu ${item.slice(1, -1)}}`
         })
+      }
+      // 处理markdown格式的图片
+      if (content[0] === '!') {
+        let name = this.getFigName(content)
+        let path = this.getFigPath(content)
+        if (name && path) {
+          return (
+            '\\begin{figure}[ht]\n' +
+            '\t\\centering\n' +
+            `\t\\includegraphics[width=0.8\\textwidth]{${path}.png}\n` +
+            `\t\\caption{${name}}\n` +
+            `\t\\label{fig:${name}}\n` +
+            `\t%\\ref{fig:${name}}\n` +
+            '\\end{pfigure}\n'
+          )
+        }
       }
       return content
     },
