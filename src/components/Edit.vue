@@ -1,10 +1,15 @@
 <template>
   <div id="app">
     <header>
-      <el-tooltip content="点击跳转到帮助文档"
-                  placement="right">
-        <span onclick="window.open('https://github.com/Nshcn/latexHelper')">latexHelper</span>
-      </el-tooltip>
+      <span>latexHelper</span>
+      <div class="header-right">
+        <i class="el-icon-document"
+           onclick="window.open('https://github.com/Nshcn/latexHelper')">
+          帮助</i>
+        <i class="el-icon-question"
+           onclick="window.open('https://github.com/Nshcn/latexHelper/issues/new')">
+          issue</i>
+      </div>
     </header>
     <section class="origin-section">
       <div class="templates-wrap wrap">
@@ -432,7 +437,7 @@ export default {
           return this.parseInlineText(line)
         })
         .join('\n')
-      // 补上末尾的斜杠
+      // 补上末尾的标记
       result =
         result[result.length - 1] === this.ms ? result : result + '\n' + this.ms
 
@@ -443,7 +448,6 @@ export default {
         let regStr = new RegExp(`${startMark}[\\s\\S]+?${endMark}`, 'gm')
 
         result = result.replace(regStr, (item) => {
-          console.log(item)
           let startPos = startMark.length
           let endPos = item.length - endMark.length
           return this.parseSingleType(markType)(
@@ -456,13 +460,8 @@ export default {
       result = result.replace(/^#.{0,}/gm, () => {
         return ''
       })
-      this.latexCode = result + 'abc'
-      this.$message({
-        message: '已复制到剪切板',
-        type: 'success',
-      })
-
-      // this.copyResult()
+      this.latexCode = result
+      this.copyResult()
     },
 
     parseSingleType(type) {
@@ -513,16 +512,61 @@ export default {
      * 处理图片
      */
     parseFigure(content) {
-      let figName = content
-      return (
-        '\\begin{figure}[ht]\n' +
-        '\t\\centering\n' +
-        `\t\\includegraphics[width=0.8\\textwidth]{${figName}.png}\n` +
-        `\t\\caption{${figName}}\n` +
-        `\t\\label{fig:${figName}}\n` +
-        `\t%\\ref{fig:${figName}}\n` +
-        '\\end{figure}\n'
-      )
+      let name = this.getFigName(content)
+      let path = this.getFigPath(content)
+      let splitArr = content.split('\n')
+      let figArr =
+        name && splitArr.length > 1 ? splitArr.slice(0, -1) : splitArr
+      let len = figArr.length
+      if (len > 4) {
+        return '暂不支持处理多于4张的图片'
+      }
+
+      let result = '\\begin{figure}[ht]\n' + '\t\\centering\n'
+      // 只有一张图片
+      if (figArr.length === 1) {
+        result +=
+          `\t\\includegraphics[width=0.8\\textwidth]{${
+            path ? path : '图片路径'
+          }.png}\n` +
+          `\t\\caption{${name ? name : figArr[0]}}\n` +
+          `\t\\label{fig:${name ? name : figArr[0]}}%\\ref{fig:${
+            name ? name : figArr[0]
+          }}\n`
+      } else {
+        // 处理多张图片
+        let size = {
+          4: [0.23, 1.7],
+          3: [0.3, 2.2],
+          2: [0.45, 2.5],
+        }
+        for (let fig of figArr) {
+          result +=
+            `\t\\subfigure[${fig}]{\n` +
+            `\t\t\\begin{minipage}[ht]{${size[len][0]}\\linewidth}\n` +
+            '\t\t\\centering\n' +
+            `\t\t\\includegraphics[width=${size[len][1]}in]{${
+              path ? path : '图片路径'
+            }.png}\n` +
+            `\t\t\\label{fig:${figArr[0]}}%\\ref{fig:${figArr[0]}}\n` +
+            '\t\t\\end{minipage}\n' +
+            '\t}\n'
+        }
+        result += `\t\\caption{${name ? name : '图片名'}}\n\t\\label{fig:${
+          name ? name : '图片标签'
+        }}%\\ref{fig:${name ? name : '图片标签'}}\n`
+      }
+      result += '\\end{figure}\n'
+      return result
+    },
+    // 提取图片名字和路径
+    getFigName(content) {
+      let match = content.match(/^\[.+\]/gm)
+      return match ? match[0].slice(1, -1) : ''
+    },
+    getFigPath(content) {
+      let match = content.match(/\(.+\)/gm)
+      return match ? match[0].slice(1, -1) : ''
     },
     parseWrapFigure(content) {
       let figName = content
@@ -755,7 +799,25 @@ export default {
   font-weight: 800;
   text-align: center;
   margin: 10px;
+  position: relative;
 }
+.header-right {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  font-size: 12px;
+  right: 0;
+  top: 0;
+  text-align: left;
+}
+.header-right i {
+  cursor: pointer;
+  margin: 3px;
+}
+.header-right i::before {
+  margin-right: 3px;
+}
+
 #app header span {
   cursor: pointer;
 }
