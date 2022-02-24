@@ -1,3 +1,4 @@
+const vConsolePlugin = require('vconsole-webpack-plugin')
 
 module.exports = {
   pages: {
@@ -6,5 +7,18 @@ module.exports = {
       title: 'latexHelper'
     }
   },
-  publicPath: './'
+  publicPath: './',
+  configureWebpack: config => {
+    //生产环境去掉vconsole调试器
+  let envType = process.env.NODE_ENV != 'production'
+  let pluginsDev = [
+      new vConsolePlugin({
+          filter: [],
+          enable: envType
+      })
+  ]
+
+  config.plugins = [...config.plugins, ...pluginsDev]
+ }
+
 }

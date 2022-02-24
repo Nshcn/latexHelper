@@ -415,7 +415,10 @@ export default {
     },
 
     test() {
-      this.isActive = true
+ this.$message({
+          type: 'success',
+          message: '模板保存成功',
+        })
     },
     /**
      * 预览
@@ -432,23 +435,34 @@ export default {
       // 补上末尾的斜杠
       result =
         result[result.length - 1] === this.ms ? result : result + '\n' + this.ms
+      
       // 依次处理各个模块
-      for (let markType of this.markTypeArr) {
+      // for (let markType of this.markTypeArr) {
+      for(let i=0;i<this.markTypeArr.length;i++){
+        let markType=this.markTypeArr[i]
         let regStr = new RegExp(
-          `(?<=(${this.ms + markType}\\s))[\\s\\S*]+?(?=${this.ms})`,
+          `(?<=(#ul}\\s))[\\s\\S*]+?(?=#})`,
+          // `(?<=(${this.ms + markType}\\s))[\\s\\S*]+?(?=${this.ms})`,
           'gm'
         )
         result = result.replace(regStr, (item) => {
           return this.parseSingleType(markType)(item.trim())
         })
-      }
+        }
+
+
       // 去除所有mark
-      // TODO: 自定义符号替换#
       result = result.replace(/^#.{0,}/gm, () => {
         return ''
       })
-      this.latexCode = result
-      this.copyResult()
+      this.latexCode = result+'abc'
+      this.$message({
+        message: '已复制到剪切板',
+        type: 'success',
+      })
+      
+    
+      // this.copyResult()
     },
 
     parseSingleType(type) {
@@ -784,7 +798,7 @@ export default {
 
 #edit-area,
 #preview-area {
-  font-family: consolas;
+  font-family: consolas fongsong;
 }
 * {
   margin: 0;
@@ -841,5 +855,9 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #bbb;
+}
+
+.latex-section {
+  background: aliceblue;
 }
 </style>
