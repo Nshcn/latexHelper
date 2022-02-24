@@ -415,10 +415,10 @@ export default {
     },
 
     test() {
- this.$message({
-          type: 'success',
-          message: '模板保存成功',
-        })
+      this.$message({
+        type: 'success',
+        message: '模板保存成功',
+      })
     },
     /**
      * 预览
@@ -435,33 +435,33 @@ export default {
       // 补上末尾的斜杠
       result =
         result[result.length - 1] === this.ms ? result : result + '\n' + this.ms
-      
-      // 依次处理各个模块
-      // for (let markType of this.markTypeArr) {
-      for(let i=0;i<this.markTypeArr.length;i++){
-        let markType=this.markTypeArr[i]
-        let regStr = new RegExp(
-          `(?<=(#ul}\\s))[\\s\\S*]+?(?=#})`,
-          // `(?<=(${this.ms + markType}\\s))[\\s\\S*]+?(?=${this.ms})`,
-          'gm'
-        )
-        result = result.replace(regStr, (item) => {
-          return this.parseSingleType(markType)(item.trim())
-        })
-        }
 
+      // 依次处理各个模块
+      let endMark = this.ms
+      for (let markType of this.markTypeArr) {
+        let startMark = this.ms + markType
+        let regStr = new RegExp(`${startMark}[\\s\\S]+?${endMark}`, 'gm')
+
+        result = result.replace(regStr, (item) => {
+          console.log(item)
+          let startPos = startMark.length
+          let endPos = item.length - endMark.length
+          return this.parseSingleType(markType)(
+            item.trim().substring(startPos + 1, endPos - 1)
+          )
+        })
+      }
 
       // 去除所有mark
       result = result.replace(/^#.{0,}/gm, () => {
         return ''
       })
-      this.latexCode = result+'abc'
+      this.latexCode = result + 'abc'
       this.$message({
         message: '已复制到剪切板',
         type: 'success',
       })
-      
-    
+
       // this.copyResult()
     },
 
@@ -800,6 +800,7 @@ export default {
 #preview-area {
   font-family: consolas fongsong;
 }
+
 * {
   margin: 0;
 }
