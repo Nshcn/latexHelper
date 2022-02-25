@@ -102,8 +102,9 @@
           生成latex
         </el-button>
         <el-button type="text"
+                   v-if="env==='development'"
                    size="small"
-                   @click="test">test</el-button>
+                   @click="test">测试</el-button>
       </div>
       <el-input type="textarea"
                 class="text-area"
@@ -271,6 +272,7 @@ export default {
   },
   data() {
     return {
+      env: process.env.NODE_ENV,
       isActive: false, // 预览区是否激活
       originText: '', // 源码
       latexCode: '', // latex
@@ -422,7 +424,7 @@ export default {
     test() {
       this.$message({
         type: 'success',
-        message: '模板保存成功',
+        message: 'test',
       })
     },
     /**
