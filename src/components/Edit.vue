@@ -123,7 +123,7 @@
                        size="small"
                        @click="preview">
               <i class="el-icon-refresh" />
-              生成latex
+              生成LaTex
             </el-button>
             <el-button type="text"
                        v-if="env==='development'"
@@ -230,7 +230,7 @@
                   class="text-area"
                   :class="{active:isActive}"
                   id="latex-area"
-                  placeholder="Latex原生语法编辑区"
+                  placeholder="LaTex原生语法编辑区"
                   v-model="latexCode"
                   @keydown.tab.native="tabInput($event)"
                   show-word-limit>

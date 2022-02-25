@@ -1,13 +1,13 @@
 # LatexHelper
 
-LatexHelper 是一个可以简化一些特定 latex 代码语法的工具，通过一些简单的语法代码生成其对应的 latex 语法，让作者更专注于写作本身。
+LatexHelper 是一个可以简化一些特定 LaTex 代码语法的工具，通过一些简单的语法代码生成其对应的 LaTex 语法，让作者更专注于写作本身。
 
 ![image](https://github.com/Nshcn/latexHelper/blob/main/img/latexHelper.gif)
 
 ## 使用方法
 
 LatexHelper 默认通过在行首的`#`作为标记符号，在两个行首的`#`之间书写文字内容。
-LatexHelper 分为两个大的编辑区，左侧为 LatexHelper 特有语法的编辑区（后面简称 LH 编辑区），点击`生成latex`按钮后即可在右侧 latex 原生语法编辑区显示对应的 latex 内容。
+LatexHelper 分为两个大的编辑区，左侧为 LatexHelper 特有语法的编辑区（后面简称 LH 编辑区），点击`生成LaTex`按钮后即可在右侧 LaTex 原生语法编辑区显示对应的 LaTex 内容。
 
 LH 编辑区的语法非常简单，在第一个`#`后面紧跟着写上特有的语法标记，例如`#ul`表示无序列表、`#fig`表示图片、`#bf`表示加粗等等。LatexHelper 目前支持以下语法。
 
@@ -81,28 +81,24 @@ ccc
 	\centering
 	\includegraphics[width=0.8\textwidth]{图片路径.png}
 	\caption{图片名字}
-	\label{fig:图片名字}
-	%\ref{fig:图片名字}
+	\label{fig:图片名字}%\ref{fig:图片名字}
 \end{figure}
 
 \begin{wrapfigure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{图片名字.png}
 	\caption{图片名字}
-	\label{fig:图片名字}
-	%\ref{fig:图片名字}
+	\label{fig:图片名字}%\ref{fig:图片名字}
 \end{wrapfigure}
 ```
 
-支持并排显示多个图片
+支持并排显示多个图片，LatexHelper 会根据图片的数量设置合适的 width，最多可以支持并排显示 4 张图片。
 
 ```latex
 #fig
 pic1
 pic2
 #
-LatexHelper 会根据图片的数量设置合适的 width，最多可以支持并排显示 4 张图片。
-
 =============>
 \begin{figure}[ht]
 	\centering
@@ -242,9 +238,13 @@ eee
 
 在 LH 的编辑区输入 LatexHelper 代码语法后并填写模板名称，可以点击`保存当前编辑区为新模板`来保存当前编辑区为模板。同时可以删除已经存在的模板或对其进行修改覆盖。
 
-### latex 原生语法编辑区
+### 保存历史
 
-选中 latex 原生语法编辑区的内容后再点击转换按钮可以对其进行 latex 语法转换，如转换成有序列表、设置成楷体、加粗等。
+在 LH 的编辑区点击`保存当前编辑区编辑记录`来保存当前编辑区内容。
+
+### LaTex 原生语法编辑区
+
+选中 LaTex 原生语法编辑区的内容后再点击转换按钮可以对其进行 LaTex 语法转换，如转换成有序列表、设置成楷体、加粗等。
 
 ````latex
 aaa
@@ -259,11 +259,11 @@ bbb
 
 #### 代码片段
 
-可以保存一些自己常用的 latex 代码片段。
+可以保存一些自己常用的 LaTex 代码片段。
 
 ## 开发计划
 
 - [x] 支持多重嵌套列表
-- [] 支持富文本编辑器
-- [] 支持自定义标记符
-- [] 支持更多 latex 语法
+- [ ] 支持富文本编辑器
+- [ ] 支持自定义标记符
+- [ ] 支持更多 latex 语法
