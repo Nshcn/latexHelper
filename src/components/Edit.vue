@@ -16,15 +16,17 @@
         <div class="region">
           <div class="up-region">
             <span>模板列表</span>
-            <el-tooltip content="点击下方保存当前编辑区为新模板即可添加自定义模板"
-                        placement="top">
-              <i class="el-icon-question" />
-            </el-tooltip>
+            <el-button type="text"
+                       size="small"
+                       @click="saveTemplate">
+              <i class="el-icon-folder-opened" />
+              保存当前编辑区为新模板
+            </el-button>
           </div>
           <div class="down-region">
             <el-tag v-for="item in templateStore"
-                    class="template-item"
-                    size="small"
+                    class="tag-item"
+                    size="mini"
                     :key="item.name"
                     @close="deleteTemplate(item.name)"
                     @click="showTemplate(item.name)"
@@ -77,18 +79,12 @@
         </el-tooltip>
       </div>
       <div class="name-input">
-        <span>模板名称</span>
+        <span>{{titleType==='lh'?'记录名称':'模板名称'}}</span>
         <el-input v-model="templateName"
                   size="small"
-                  placeholder="请输入模板名称"></el-input>
+                  :placeholder="titleType==='lh'?'请输入需要保存的记录名称':'请输入需要保存的模板名称'"></el-input>
       </div>
       <div class="operate-area">
-        <el-button type="text"
-                   size="small"
-                   @click="saveTemplate">
-          <i class="el-icon-circle-plus-outline" />
-          保存当前编辑区为新模板
-        </el-button>
         <el-button type="text"
                    size="small"
                    @click="originText = ''">
@@ -115,6 +111,31 @@
                 @keydown.tab.native="tabInput($event)"
                 show-word-limit>
       </el-input>
+      <div class="history">
+        <div class="region">
+          <div class="up-region">
+            <span>历史记录</span>
+            <el-button type="text"
+                       size="small"
+                       @click="saveLhHistory">
+              <i class="el-icon-folder-opened" />
+              保存当前编辑区编辑记录
+            </el-button>
+          </div>
+          <div class="down-region">
+            <el-tag v-for="item in historyLhStore"
+                    class="tag-item"
+                    size="mini"
+                    :key="item.name"
+                    @close="deleteLhHistory(item.name)"
+                    @click="showLhHistory(item.name)"
+                    closable>
+              <i class="el-icon-tickets" />
+              {{item.name}}
+            </el-tag>
+          </div>
+        </div>
+      </div>
     </section>
     <section class="latex-section">
       <div class="insert-btn">
@@ -130,7 +151,7 @@
             <div class="down-region">
               <el-tag v-for="item in snippetStore"
                       size="small"
-                      class="snippet-item"
+                      class="tag-item"
                       :key="item.name"
                       @close="deleteSnippet(item.name)"
                       @click="insertSnippet(item.name)"
@@ -229,6 +250,15 @@ export default {
       },
       deep: true,
     },
+    historyLhStore: {
+      handler(newValue) {
+        storage.setItem({
+          value: newValue,
+          name: 'historyLhStore',
+        })
+      },
+      deep: true,
+    },
     snippetStore: {
       handler(newValue) {
         storage.setItem({
@@ -247,11 +277,11 @@ export default {
       this.templateStore.push(
         {
           name: '选择题',
-          content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【xxx启发】\n${this.ms}ol\n\n${this.ms}\n【xxx启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         },
         {
           name: '大题',
-          content: `年份：20\n题号：\n【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【xxx启发】\n${this.ms}ol\n\n${this.ms}\n【xxx启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         }
       )
       storage.setItem({
@@ -259,7 +289,13 @@ export default {
         name: 'templateStore',
       })
     }
+    // 获取本地history Lh编辑区的历史记录
+    let localHistoryLhStore = storage.getItem('historyLhStore')
+    if (localHistoryLhStore) {
+      this.historyLhStore = localHistoryLhStore
+    }
 
+    // 获取本地snippet片段
     let localSnippetStore = storage.getItem('snippetStore')
     if (localSnippetStore) {
       this.snippetStore = localSnippetStore
@@ -298,6 +334,8 @@ export default {
         },
       ],
       templateStore: [],
+      historyLhStore: [],
+      titleType: 'template',
     }
   },
   methods: {
@@ -335,6 +373,26 @@ export default {
         }
       }
     },
+    showLhHistory(templateName) {
+      if (this.originText.trim() !== '') {
+        this.saveLhHistory(this.templateName)
+        this.templateName = templateName
+        for (let item of this.historyLhStore) {
+          if (item.name === templateName) {
+            this.originText = item.content
+            return
+          }
+        }
+      } else {
+        this.templateName = templateName
+        for (let item of this.historyLhStore) {
+          if (item.name === templateName) {
+            this.originText = item.content
+            return
+          }
+        }
+      }
+    },
     deleteTemplate(templateName) {
       for (let i = 0; i < this.templateStore.length; i++) {
         if (this.templateStore[i].name === templateName) {
@@ -359,18 +417,83 @@ export default {
         }
       }
     },
-    saveTemplate() {
+    deleteLhHistory(templateName) {
+      for (let i = 0; i < this.historyLhStore.length; i++) {
+        if (this.historyLhStore[i].name === templateName) {
+          this.$confirm(
+            `此操作将永久删除"${templateName}"记录, 是否继续?`,
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }
+          )
+            .then(() => {
+              this.historyLhStore.splice(i, 1)
+              this.$message({
+                type: 'success',
+                message: '删除成功!',
+              })
+              return
+            })
+            .catch(() => {})
+        }
+      }
+    },
+    saveLhHistory() {
+      this.titleType = 'lh'
       if (this.templateName === '') {
         this.$message({
           type: 'warning',
-          message: '请输入模板名称',
+          message: '记录名称为空',
         })
         return
       }
       if (this.originText === '') {
         this.$message({
           type: 'warning',
-          message: '模板编辑区为空',
+          message: '编辑区为空',
+        })
+        return
+      }
+      let repeatIndex = -1
+      for (let i = 0; i < this.historyLhStore.length; i++) {
+        if (this.historyLhStore[i].name === this.templateName) {
+          repeatIndex = i
+          break
+        }
+      }
+      if (repeatIndex !== -1) {
+        this.historyLhStore[repeatIndex].content = this.originText
+        this.$message({
+          type: 'success',
+          message: '保存成功!',
+        })
+      } else {
+        this.historyLhStore.push({
+          name: this.templateName,
+          content: this.originText,
+        })
+        this.$message({
+          type: 'success',
+          message: '新记录保存成功',
+        })
+      }
+    },
+    saveTemplate() {
+      this.titleType = 'template'
+      if (this.templateName === '') {
+        this.$message({
+          type: 'warning',
+          message: '模板名称为空',
+        })
+        return
+      }
+      if (this.originText === '') {
+        this.$message({
+          type: 'warning',
+          message: '编辑区为空',
         })
         return
       }
@@ -883,8 +1006,7 @@ export default {
 .latex-snippet-wrap {
   /* padding: 10px; */
 }
-.template-item,
-.snippet-item {
+.tag-item {
   margin: 5px 10px 5px 0 !important;
   cursor: pointer;
 }
