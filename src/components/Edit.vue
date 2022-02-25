@@ -120,21 +120,21 @@
               清空
             </el-button>
             <el-button type="text"
-                       v-if="env==='development'"
-                       size="small"
-                       @click="test">测试</el-button>
-            <el-button type="text"
                        size="small"
                        @click="preview">
               <i class="el-icon-refresh" />
               生成latex
             </el-button>
+            <el-button type="text"
+                       v-if="env==='development'"
+                       size="small"
+                       @click="test">测试</el-button>
           </div>
         </div>
         <el-input type="textarea"
                   class="text-area lh-area"
                   id="lh-area"
-                  placeholder="请输入内容"
+                  placeholder="LatexHelper语法编辑区"
                   v-model="originText"
                   @keydown.tab.native="tabInput($event)"
                   show-word-limit>
@@ -230,7 +230,7 @@
                   class="text-area"
                   :class="{active:isActive}"
                   id="latex-area"
-                  placeholder="预览"
+                  placeholder="Latex原生语法编辑区"
                   v-model="latexCode"
                   @keydown.tab.native="tabInput($event)"
                   show-word-limit>

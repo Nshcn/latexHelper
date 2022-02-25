@@ -1,15 +1,15 @@
-# latexHelper
+# LatexHelper
 
-latexHelper 是一个可以简化一些特定 latex 代码语法的工具，通过一些简单的语法代码生成其对应的 latex 语法，让作者更专注于写作本身。
+LatexHelper 是一个可以简化一些特定 latex 代码语法的工具，通过一些简单的语法代码生成其对应的 latex 语法，让作者更专注于写作本身。
 
 ![image](https://github.com/Nshcn/latexHelper/blob/main/img/latexHelper.gif)
 
 ## 使用方法
 
-latexHelper 默认通过在行首的`#`作为标记符号，在两个行首的`#`之间书写文字内容。
-latexHelper 分为两个大的编辑区，上方为 latexHelper 特有语法的编辑区（后面简称 LH 编辑区），点击`生成latex`按钮后即可在下方 latex 原生语法编辑区显示对应的 latex 内容。
+LatexHelper 默认通过在行首的`#`作为标记符号，在两个行首的`#`之间书写文字内容。
+LatexHelper 分为两个大的编辑区，上方为 LatexHelper 特有语法的编辑区（后面简称 LH 编辑区），点击`生成latex`按钮后即可在右侧 latex 原生语法编辑区显示对应的 latex 内容。
 
-LH 编辑区的语法非常简单，在第一个`#`后面紧跟着写上特有的语法标记，例如`#ul`表示无序列表、`#fig`表示图片、`#bf`表示加粗等等。latexHelper 目前支持以下语法。
+LH 编辑区的语法非常简单，在第一个`#`后面紧跟着写上特有的语法标记，例如`#ul`表示无序列表、`#fig`表示图片、`#bf`表示加粗等等。LatexHelper 目前支持以下语法。
 
 #### 无序列表
 
@@ -20,7 +20,7 @@ bbb
 #
 ```
 
-点击`生成latex`按钮后得到如下代码
+===>
 
 ```latex
 \begin{itemize}[leftmargin=2\parindent]
@@ -38,7 +38,7 @@ bbb
 #
 ```
 
-点击`生成latex`按钮后得到如下代码
+===>
 
 ```latex
 \begin{enumerate}[leftmargin=2\parindent]
@@ -47,10 +47,10 @@ bbb
 \end{enumerate}
 ```
 
-_注意_，列表代码块暂不支持嵌套，即如下代码块不会生效
+列表代码块支持嵌套。
 
 ```
-#ol
+#ul
 aaa
   #ol
   111
@@ -59,6 +59,20 @@ aaa
 bbb
 ccc
 #
+```
+
+===>
+
+```latex
+\begin{itemize}[leftmargin=2\parindent]
+\item aaa
+  \begin{enumerate}[leftmargin=2\parindent]
+  \item 111
+  \item 222
+  \begin{itemize}[leftmargin=2\parindent]
+\item bbb
+\item ccc
+\end{itemize}
 ```
 
 #### 图片
@@ -75,7 +89,7 @@ ccc
 #
 ```
 
-点击`生成latex`按钮后得到如下代码
+===>
 
 ```latex
 \begin{figure}[ht]
@@ -104,7 +118,9 @@ pic2
 #
 ```
 
-点击`生成latex`按钮后得到如下代码，latexHelper 会根据图片的数量设置合适的 width，最多可以支持并排显示 4 张图片。
+LatexHelper 会根据图片的数量设置合适的 width，最多可以支持并排显示 4 张图片。
+
+===>
 
 ```latex
 \begin{figure}[ht]
@@ -138,7 +154,7 @@ pic2
 #
 ```
 
-点击`生成latex`按钮后得到如下代码
+===>
 
 ```latex
 
@@ -163,7 +179,7 @@ pic2
 \end{figure}
 ```
 
-latexHelper 支持 markdown 的图片格式`![]()`，且兼容中文输入，例如`【name】（path）`也可以被正确识别。
+LatexHelper 支持 markdown 的图片格式`![]()`，且兼容中文输入，例如`【name】（path）`也可以被正确识别。
 
 ```
 ![name](path)
@@ -226,7 +242,7 @@ eee
 #
 ```
 
-latexHelper 会自动去除掉选项前多余的 A,B,C,D,-等前缀，并根据选项的长度来设置合适的选项行数。
+LatexHelper 会自动去除掉选项前多余的 A,B,C,D,-等前缀，并根据选项的长度来设置合适的选项行数。
 
 ```latex
 \onech
@@ -260,7 +276,7 @@ latexHelper 会自动去除掉选项前多余的 A,B,C,D,-等前缀，并根据�
 
 ### 保存模板
 
-在 LH 的编辑区输入 latexHelper 代码语法后并填写模板名称，可以点击`保存当前编辑区为新模板`来保存当前编辑区为模板。同时可以删除已经存在的模板或对其进行修改覆盖。
+在 LH 的编辑区输入 LatexHelper 代码语法后并填写模板名称，可以点击`保存当前编辑区为新模板`来保存当前编辑区为模板。同时可以删除已经存在的模板或对其进行修改覆盖。
 
 ### latex 原生语法编辑区
 
@@ -286,6 +302,6 @@ bbb
 
 ## 开发计划
 
-- 支持多重嵌套列表
+- [x] 支持多重嵌套列表
 - 支持自定义标记符
 - 支持更多 latex 语法
