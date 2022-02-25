@@ -76,7 +76,6 @@ ccc
 图片2
 #
 =============>
-
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{图片路径.png}
@@ -160,8 +159,7 @@ LatexHelper 支持 markdown 的图片格式`![]()`，且兼容中文输入，例
 	\centering
 	\includegraphics[width=0.8\textwidth]{path.png}
 	\caption{name}
-	\label{fig:name}
-	%\ref{fig:name}
+	\label{fig:name}%\ref{fig:name}
 \end{figure}
 ```
 
