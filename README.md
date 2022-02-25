@@ -42,6 +42,7 @@ bbb
 列表代码块支持嵌套。
 
 ```latex
+// LH语法
 #ul
 aaa
   #ol
@@ -51,7 +52,7 @@ aaa
 bbb
 ccc
 #
-===>
+// Latex语法
 \begin{itemize}[leftmargin=2\parindent]
 \item aaa
   \begin{enumerate}[leftmargin=2\parindent]
