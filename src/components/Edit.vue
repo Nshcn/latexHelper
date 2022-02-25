@@ -297,20 +297,7 @@ export default {
           content: '\\[\n    \\mathbf{}\n\\]',
         },
       ],
-      templateStore: [
-        // {
-        //   name: '空白',
-        //   content: '',
-        // },
-        // {
-        //   name: '选择题',
-        //   content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
-        // },
-        // {
-        //   name: '大题',
-        //   content: `【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
-        // },
-      ],
+      templateStore: [],
     }
   },
   methods: {
@@ -612,6 +599,15 @@ export default {
         content = content.replace(regStrKaishu, (item) => {
           return `{\\kaishu ${item.slice(1, -1)}}`
         })
+      }
+      // 处理标题
+      if (/^# (.+)/.test(content)) {
+        let section = content.match(/^# (.+)/)[1]
+        return `\\section{${section}}`
+      }
+      if (/^## (.+)/.test(content)) {
+        let subSection = content.match(/^## (.+)/)[1]
+        return `\\subsection{${subSection}}`
       }
       // 处理markdown格式的图片
       if (content[0] === '!') {
