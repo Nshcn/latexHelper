@@ -353,6 +353,7 @@ export default {
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
     showTemplate(templateName) {
+      this.titleType = 'template'
       if (this.originText.trim() !== '') {
         this.$confirm(`切换模板会清空编辑区, 是否继续?`, '提示', {
           confirmButtonText: '确定',
@@ -1015,7 +1016,9 @@ export default {
 .down-region {
   /* overflow: scroll; */
   padding: 0 5px 0 5px;
-  flex: 1;
+  max-height: 65px;
+  overflow: scroll;
+  /* flex: 1; */
 }
 .name-input {
   display: flex;
