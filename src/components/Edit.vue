@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
+  <div id="main">
     <header>
-      <span>latexHelper</span>
+      <span>LatexHelper</span>
       <div class="header-right">
         <i class="el-icon-document"
            onclick="window.open('https://github.com/Nshcn/latexHelper')">
@@ -11,204 +11,232 @@
           issue</i>
       </div>
     </header>
-    <section class="origin-section">
-      <div class="templates-wrap wrap">
-        <div class="region">
-          <div class="up-region">
-            <span>模板列表</span>
-            <el-tooltip content="点击下方保存当前编辑区为新模板即可添加自定义模板"
-                        placement="top">
-              <i class="el-icon-question" />
+    <div class="content-wrapper">
+      <section class="origin-section">
+        <div class="operate-area">
+          <div class="templates-wrap wrap">
+            <div class="region">
+              <div class="up-region">
+                <span>模板列表</span>
+                <el-button type="text"
+                           size="small"
+                           @click="saveTemplate">
+                  <i class="el-icon-folder-opened" />
+                  保存当前编辑区为新模板
+                </el-button>
+              </div>
+              <div class="down-region">
+                <el-tag v-for="item in templateStore"
+                        class="tag-item"
+                        size="mini"
+                        :key="item.name"
+                        @close="deleteTemplate(item.name)"
+                        @click="showTemplate(item.name)"
+                        closable>
+                  <i class="el-icon-tickets" />
+                  {{item.name}}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+          <div class="history">
+            <div class="region">
+              <div class="up-region">
+                <span>存档记录</span>
+                <el-button type="text"
+                           size="small"
+                           @click="saveLhHistory">
+                  <i class="el-icon-folder-opened" />
+                  保存当前编辑区编辑记录
+                </el-button>
+              </div>
+              <div class="down-region">
+                <el-tag v-for="item in historyLhStore"
+                        class="tag-item"
+                        size="mini"
+                        :key="item.name"
+                        @close="deleteLhHistory(item.name)"
+                        @click="showLhHistory(item.name)"
+                        closable>
+                  <i class="el-icon-tickets" />
+                  {{item.name}}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+          <div class="name-input">
+            <span>{{titleType==='lh'?'记录名称':'模板名称'}}</span>
+            <el-input v-model="templateName"
+                      size="small"
+                      :placeholder="titleType==='lh'?'请输入需要保存的记录名称':'请输入需要保存的模板名称'"></el-input>
+          </div>
+          <div class="insert-btn">
+            <el-button type="text"
+                       size="small"
+                       @click="addMark(listType)">
+              <i class="el-icon-circle-plus-outline" />
+              列表
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       @click="addMark('fig')">
+              <i class="el-icon-circle-plus-outline" />
+              图片
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       @click="addMark('opt')">
+              <i class="el-icon-circle-plus-outline" />
+              选项
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       @click="addMark('kaishu')">
+              <i class="el-icon-circle-plus-outline" />
+              楷书
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       @click="addMark('bf')">
+              <i class="el-icon-circle-plus-outline" />
+              粗体
+            </el-button>
+            <el-tooltip content="latex-tables.com"
+                        placement="right">
+              <el-button type="text"
+                         size="small"
+                         onclick="window.open('https://www.latex-tables.com/#')">
+                <i class="el-icon-circle-plus-outline" />
+                表格
+              </el-button>
             </el-tooltip>
           </div>
-          <div class="down-region">
-            <el-tag v-for="item in templateStore"
-                    class="template-item"
-                    size="small"
-                    :key="item.name"
-                    @close="deleteTemplate(item.name)"
-                    @click="showTemplate(item.name)"
-                    closable>
-              <i class="el-icon-tickets" />
-              {{item.name}}
-            </el-tag>
+
+          <div class="btn-wrapper">
+            <el-button type="text"
+                       size="small"
+                       @click="originText = ''">
+              <i class="el-icon-delete" />
+              清空
+            </el-button>
+            <el-button type="text"
+                       v-if="env==='development'"
+                       size="small"
+                       @click="test">测试</el-button>
+            <el-button type="text"
+                       style="float:right"
+                       size="small"
+                       @click="preview">
+              <i class="el-icon-refresh" />
+              生成latex
+            </el-button>
           </div>
         </div>
-      </div>
-      <div class="insert-btn">
-        <el-button type="text"
-                   size="small"
-                   @click="addMark(listType)">
-          <i class="el-icon-circle-plus-outline" />
-          列表
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="addMark('fig')">
-          <i class="el-icon-circle-plus-outline" />
-          图片
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="addMark('opt')">
-          <i class="el-icon-circle-plus-outline" />
-          选项
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="addMark('kaishu')">
-          <i class="el-icon-circle-plus-outline" />
-          楷书
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="addMark('bf')">
-          <i class="el-icon-circle-plus-outline" />
-          粗体
-        </el-button>
-        <el-tooltip content="latex-tables.com"
-                    placement="right">
+        <el-input type="textarea"
+                  class="text-area lh-area"
+                  id="lh-area"
+                  placeholder="请输入内容"
+                  :autosize="{ minRows:25}"
+                  v-model="originText"
+                  @keydown.tab.native="tabInput($event)"
+                  show-word-limit>
+        </el-input>
+
+      </section>
+      <section class="latex-section">
+        <div class="operate-area">
+
+          <div class="insert-btn">
+            <div class="latex-snippet-wrap">
+              <div class="region">
+                <div class="up-region">
+                  <span>代码片段</span>
+                  <el-button type="text"
+                             size="small"
+                             @click="saveSnippet">
+                    <i class="el-icon-circle-plus-outline" />
+                    保存当前编辑区为新片段
+                  </el-button>
+                </div>
+                <div class="down-region">
+                  <el-tag v-for="item in snippetStore"
+                          size="mini"
+                          class="tag-item"
+                          :key="item.name"
+                          @close="deleteSnippet(item.name)"
+                          @click="insertSnippet(item.name)"
+                          closable>
+                    <i class="el-icon-plus" />
+                    {{item.name}}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="name-input">
+            <span>片段名称</span>
+            <el-input v-model="snippetName"
+                      size="small"
+                      placeholder="请输入片段名称"></el-input>
+          </div>
           <el-button type="text"
                      size="small"
-                     onclick="window.open('https://www.latex-tables.com/#')">
-            <i class="el-icon-circle-plus-outline" />
-            表格
+                     @click="convertToLatex('ol')">
+            <i class="el-icon-magic-stick" />
+            有序列表
           </el-button>
-        </el-tooltip>
-      </div>
-      <div class="name-input">
-        <span>模板名称</span>
-        <el-input v-model="templateName"
-                  size="small"
-                  placeholder="请输入模板名称"></el-input>
-      </div>
-      <div class="operate-area">
-        <el-button type="text"
-                   size="small"
-                   @click="saveTemplate">
-          <i class="el-icon-circle-plus-outline" />
-          保存当前编辑区为新模板
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="originText = ''">
-          <i class="el-icon-delete" />
-          清空
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="preview">
-          <i class="el-icon-refresh" />
-          生成latex
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="test">test</el-button>
-      </div>
-      <el-input type="textarea"
-                class="text-area"
-                id="edit-area"
-                placeholder="请输入内容"
-                v-model="originText"
-                :autosize="{ minRows: 8}"
-                @keydown.tab.native="tabInput($event)"
-                show-word-limit>
-      </el-input>
-    </section>
-    <section class="latex-section">
-      <div class="insert-btn">
-        <div class="latex-snippet-wrap">
-          <div class="region">
-            <div class="up-region">
-              <span>代码片段</span>
-              <el-tooltip content="点击下方保存当前编辑区为新片段即可添加常用代码片段"
-                          placement="top">
-                <i class="el-icon-question" />
-              </el-tooltip>
-            </div>
-            <div class="down-region">
-              <el-tag v-for="item in snippetStore"
-                      size="small"
-                      class="snippet-item"
-                      :key="item.name"
-                      @close="deleteSnippet(item.name)"
-                      @click="insertSnippet(item.name)"
-                      closable>
-                <i class="el-icon-plus" />
-                {{item.name}}
-              </el-tag>
-            </div>
+          <el-button type="text"
+                     size="small"
+                     @click="convertToLatex('ul')">
+            <i class="el-icon-magic-stick" />
+            无序列表
+          </el-button>
+          <el-button type="text"
+                     size="small"
+                     @click="convertToLatex('kaishu')">
+            <i class="el-icon-magic-stick" />
+            楷体
+          </el-button>
+          <el-button type="text"
+                     size="small"
+                     @click="convertToLatex('bf')">
+            <i class="el-icon-magic-stick" />
+            加粗
+          </el-button>
+          <el-button type="text"
+                     size="small"
+                     @click="convertToLatex('fig')">
+            <i class="el-icon-magic-stick" />
+            图片
+          </el-button>
+          <div>
+            <el-button type="text"
+                       size="small"
+                       @click="latexCode = ''">
+              <i class="el-icon-delete" />
+              清空
+            </el-button>
+            <el-button type="text"
+                       size="small"
+                       @click="copyResult">
+              <i class="el-icon-document-copy" />
+              复制
+            </el-button>
           </div>
         </div>
-      </div>
-
-      <div class="name-input">
-        <span>片段名称</span>
-        <el-input v-model="snippetName"
-                  size="small"
-                  placeholder="请输入片段名称"></el-input>
-      </div>
-      <el-button type="text"
-                 size="small"
-                 @click="convertToLatex('ol')">
-        <i class="el-icon-magic-stick" />
-        有序列表
-      </el-button>
-      <el-button type="text"
-                 size="small"
-                 @click="convertToLatex('ul')">
-        <i class="el-icon-magic-stick" />
-        无序列表
-      </el-button>
-      <el-button type="text"
-                 size="small"
-                 @click="convertToLatex('kaishu')">
-        <i class="el-icon-magic-stick" />
-        楷体
-      </el-button>
-      <el-button type="text"
-                 size="small"
-                 @click="convertToLatex('bf')">
-        <i class="el-icon-magic-stick" />
-        加粗
-      </el-button>
-      <el-button type="text"
-                 size="small"
-                 @click="convertToLatex('fig')">
-        <i class="el-icon-magic-stick" />
-        图片
-      </el-button>
-      <div class="operate-area">
-        <el-button type="text"
-                   size="small"
-                   @click="saveSnippet">
-          <i class="el-icon-circle-plus-outline" />
-          保存当前编辑区为新片段
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="clear('latex')">
-          <i class="el-icon-delete" />
-          清空
-        </el-button>
-        <el-button type="text"
-                   size="small"
-                   @click="copyResult">
-          <i class="el-icon-document-copy" />
-          复制
-        </el-button>
-      </div>
-      <el-input type="textarea"
-                class="text-area"
-                :class="{active:isActive}"
-                id="preview-area"
-                placeholder="预览"
-                v-model="latexCode"
-                :autosize="{ minRows: 8}"
-                @keydown.tab.native="tabInput($event)"
-                show-word-limit>
-      </el-input>
-    </section>
+        <el-input type="textarea"
+                  class="text-area"
+                  :class="{active:isActive}"
+                  id="latex-area"
+                  :autosize="{ minRows:31}"
+                  placeholder="预览"
+                  v-model="latexCode"
+                  @keydown.tab.native="tabInput($event)"
+                  show-word-limit>
+        </el-input>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -224,6 +252,15 @@ export default {
         storage.setItem({
           value: newValue,
           name: 'templateStore',
+        })
+      },
+      deep: true,
+    },
+    historyLhStore: {
+      handler(newValue) {
+        storage.setItem({
+          value: newValue,
+          name: 'historyLhStore',
         })
       },
       deep: true,
@@ -246,11 +283,11 @@ export default {
       this.templateStore.push(
         {
           name: '选择题',
-          content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n\n${this.ms}opt\n\n${this.ms}\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【xxx启发】\n${this.ms}ol\n\n${this.ms}\n【xxx启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         },
         {
           name: '大题',
-          content: `年份：20\n题号：\n【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
+          content: `年份：20\n题号：\n【题目】\n{\\kaishu\n【参考答案】\n\n【本题解析】\n\n【xxx启发】\n${this.ms}ol\n\n${this.ms}\n【xxx启发】\n\n${this.ms}ol\n\n${this.ms}\n}\n`,
         }
       )
       storage.setItem({
@@ -258,7 +295,13 @@ export default {
         name: 'templateStore',
       })
     }
+    // 获取本地history Lh编辑区的历史记录
+    let localHistoryLhStore = storage.getItem('historyLhStore')
+    if (localHistoryLhStore) {
+      this.historyLhStore = localHistoryLhStore
+    }
 
+    // 获取本地snippet片段
     let localSnippetStore = storage.getItem('snippetStore')
     if (localSnippetStore) {
       this.snippetStore = localSnippetStore
@@ -271,6 +314,7 @@ export default {
   },
   data() {
     return {
+      env: process.env.NODE_ENV,
       isActive: false, // 预览区是否激活
       originText: '', // 源码
       latexCode: '', // latex
@@ -295,31 +339,21 @@ export default {
           content: '\\[\n    \\mathbf{}\n\\]',
         },
       ],
-      templateStore: [
-        // {
-        //   name: '空白',
-        //   content: '',
-        // },
-        // {
-        //   name: '选择题',
-        //   content: `【题目】\n\n${this.ms}opt\n\n${this.ms}\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
-        // },
-        // {
-        //   name: '大题',
-        //   content: `【题目】\n\n【参考答案】\n\n【本题解析】\n\n【对知识点解析工作的启发】\n${this.ms}ol\n\n${this.ms}\n【对命制练习题的启发】\n${this.ms}ol\n\n${this.ms}\n`,
-        // },
-      ],
+      templateStore: [],
+      historyLhStore: [],
+      titleType: 'template',
     }
   },
   methods: {
     addMark(type) {
-      let dom = document.getElementById('edit-area')
+      let dom = document.getElementById('lh-area')
       this.originText =
         dom.value.substring(0, dom.selectionStart) +
         `\n${this.ms + type}\n\n${this.ms}\n` +
         dom.value.substring(dom.selectionEnd, dom.textLength)
     },
     showTemplate(templateName) {
+      this.titleType = 'template'
       if (this.originText.trim() !== '') {
         this.$confirm(`切换模板会清空编辑区, 是否继续?`, '提示', {
           confirmButtonText: '确定',
@@ -339,6 +373,26 @@ export default {
       } else {
         this.templateName = templateName
         for (let item of this.templateStore) {
+          if (item.name === templateName) {
+            this.originText = item.content
+            return
+          }
+        }
+      }
+    },
+    showLhHistory(templateName) {
+      if (this.originText.trim() !== '') {
+        this.saveLhHistory(this.templateName)
+        this.templateName = templateName
+        for (let item of this.historyLhStore) {
+          if (item.name === templateName) {
+            this.originText = item.content
+            return
+          }
+        }
+      } else {
+        this.templateName = templateName
+        for (let item of this.historyLhStore) {
           if (item.name === templateName) {
             this.originText = item.content
             return
@@ -370,18 +424,83 @@ export default {
         }
       }
     },
-    saveTemplate() {
+    deleteLhHistory(templateName) {
+      for (let i = 0; i < this.historyLhStore.length; i++) {
+        if (this.historyLhStore[i].name === templateName) {
+          this.$confirm(
+            `此操作将永久删除"${templateName}"记录, 是否继续?`,
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }
+          )
+            .then(() => {
+              this.historyLhStore.splice(i, 1)
+              this.$message({
+                type: 'success',
+                message: '删除成功!',
+              })
+              return
+            })
+            .catch(() => {})
+        }
+      }
+    },
+    saveLhHistory() {
+      this.titleType = 'lh'
       if (this.templateName === '') {
         this.$message({
           type: 'warning',
-          message: '请输入模板名称',
+          message: '记录名称为空',
         })
         return
       }
       if (this.originText === '') {
         this.$message({
           type: 'warning',
-          message: '模板编辑区为空',
+          message: '编辑区为空',
+        })
+        return
+      }
+      let repeatIndex = -1
+      for (let i = 0; i < this.historyLhStore.length; i++) {
+        if (this.historyLhStore[i].name === this.templateName) {
+          repeatIndex = i
+          break
+        }
+      }
+      if (repeatIndex !== -1) {
+        this.historyLhStore[repeatIndex].content = this.originText
+        this.$message({
+          type: 'success',
+          message: '保存成功!',
+        })
+      } else {
+        this.historyLhStore.push({
+          name: this.templateName,
+          content: this.originText,
+        })
+        this.$message({
+          type: 'success',
+          message: '新记录保存成功',
+        })
+      }
+    },
+    saveTemplate() {
+      this.titleType = 'template'
+      if (this.templateName === '') {
+        this.$message({
+          type: 'warning',
+          message: '模板名称为空',
+        })
+        return
+      }
+      if (this.originText === '') {
+        this.$message({
+          type: 'warning',
+          message: '编辑区为空',
         })
         return
       }
@@ -422,7 +541,7 @@ export default {
     test() {
       this.$message({
         type: 'success',
-        message: '模板保存成功',
+        message: 'test',
       })
     },
     /**
@@ -445,7 +564,7 @@ export default {
       let endMark = this.ms
       for (let markType of this.markTypeArr) {
         let startMark = this.ms + markType
-        let regStr = new RegExp(`${startMark}[\\s\\S]+?${endMark}`, 'gm')
+        let regStr = new RegExp(`${startMark}[\\s\\S]+?^${endMark}`, 'gm')
 
         result = result.replace(regStr, (item) => {
           let startPos = startMark.length
@@ -611,6 +730,15 @@ export default {
           return `{\\kaishu ${item.slice(1, -1)}}`
         })
       }
+      // 处理标题
+      if (/^# (.+)/.test(content)) {
+        let section = content.match(/^# (.+)/)[1]
+        return `\\section{${section}}`
+      }
+      if (/^## (.+)/.test(content)) {
+        let subSection = content.match(/^## (.+)/)[1]
+        return `\\subsection{${subSection}}`
+      }
       // 处理markdown格式的图片
       if (content[0] === '!') {
         let name = this.getFigName(content)
@@ -731,7 +859,7 @@ export default {
 
     insertSnippet(snippetName) {
       this.snippetName = snippetName
-      let dom = document.getElementById('preview-area')
+      let dom = document.getElementById('latex-area')
       let index = this.snippetStore.findIndex((item) => {
         return item.name === snippetName
       })
@@ -786,12 +914,8 @@ export default {
       }
     },
 
-    clear() {
-      this.latexCode = ''
-    },
-
     convertToLatex(type) {
-      let dom = document.getElementById('preview-area')
+      let dom = document.getElementById('latex-area')
       let selectText = dom.value.substring(dom.selectionStart, dom.selectionEnd)
       this.latexCode =
         dom.value.substring(0, dom.selectionStart) +
@@ -803,18 +927,47 @@ export default {
 </script>
 
 <style>
-#app section {
-  margin: 10px;
+.content-wrapper {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+  /* min-height: calc(100vh - 70px); */
+}
+
+.content-wrapper section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper .origin-section {
+  margin-right: 0 !important;
+}
+#main section {
+  margin: 0 5px 0 5px;
   border: 1px solid #9d9d9d;
   padding: 0px 8px 8px 8px;
   border-radius: 5px;
 }
-#app header {
+.origin-section {
+  background: cornsilk;
+}
+
+.text-area {
+  flex: 1;
+}
+#latex-area,
+#lh-area {
+  height: 100%;
+}
+#main header {
   font-size: 40px;
   font-weight: 800;
   text-align: center;
-  margin: 10px;
+  padding: 10px;
   position: relative;
+  height: 40px;
+  line-height: 1;
 }
 .header-right {
   display: flex;
@@ -833,7 +986,7 @@ export default {
   margin-right: 3px;
 }
 
-#app header span {
+#main header span {
   cursor: pointer;
 }
 .region {
@@ -845,6 +998,7 @@ export default {
   display: flex;
   flex-direction: column;
 }
+
 .up-region {
   padding: 5px 5px 5px 0;
   height: 100%;
@@ -855,14 +1009,21 @@ export default {
 .up-region span {
   padding-left: 5px;
 }
+.up-region .el-button {
+  float: right;
+  padding: 0;
+}
 .down-region {
   /* overflow: scroll; */
   padding: 0 5px 0 5px;
-  flex: 1;
+  max-height: 65px;
+  overflow: scroll;
+  /* flex: 1; */
 }
 .name-input {
   display: flex;
   flex-direction: row;
+  margin-bottom: 5px;
 }
 .name-input span {
   font-size: 14px;
@@ -873,25 +1034,15 @@ export default {
   flex: 1;
 }
 
-#edit-area,
-#preview-area {
-  font-family: consolas fongsong;
-}
-
 * {
   margin: 0;
 }
-.templates-wrap,
-.latex-snippet-wrap {
-  /* padding: 10px; */
-}
-.template-item,
-.snippet-item {
+.tag-item {
   margin: 5px 10px 5px 0 !important;
   cursor: pointer;
 }
 
-.active #preview-area {
+.active #latex-area {
   background: black !important;
 }
 
