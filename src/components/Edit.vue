@@ -124,7 +124,6 @@
                        size="small"
                        @click="test">测试</el-button>
             <el-button type="text"
-                       style="float:right"
                        size="small"
                        @click="preview">
               <i class="el-icon-refresh" />
@@ -136,7 +135,6 @@
                   class="text-area lh-area"
                   id="lh-area"
                   placeholder="请输入内容"
-                  :autosize="{ minRows:25}"
                   v-model="originText"
                   @keydown.tab.native="tabInput($event)"
                   show-word-limit>
@@ -225,11 +223,13 @@
             </el-button>
           </div>
         </div>
+        <!-- <Code class="text-area"
+              id="latex-area"
+              :text='originText'></Code> -->
         <el-input type="textarea"
                   class="text-area"
                   :class="{active:isActive}"
                   id="latex-area"
-                  :autosize="{ minRows:31}"
                   placeholder="预览"
                   v-model="latexCode"
                   @keydown.tab.native="tabInput($event)"
@@ -242,7 +242,7 @@
 
 <script>
 import storage from '@/utils/storage'
-
+// import Code from './Code.vue'
 export default {
   name: 'Edit',
   components: {},
@@ -538,6 +538,7 @@ export default {
       }
     },
 
+    // 测试
     test() {
       this.$message({
         type: 'success',
@@ -559,19 +560,15 @@ export default {
       // 补上末尾的标记
       result =
         result[result.length - 1] === this.ms ? result : result + '\n' + this.ms
-
       // 依次处理各个模块
       let endMark = this.ms
       for (let markType of this.markTypeArr) {
         let startMark = this.ms + markType
-        let regStr = new RegExp(`${startMark}[\\s\\S]+?^${endMark}`, 'gm')
-
-        result = result.replace(regStr, (item) => {
-          let startPos = startMark.length
-          let endPos = item.length - endMark.length
-          return this.parseSingleType(markType)(
-            item.trim().substring(startPos + 1, endPos - 1)
-          )
+        let regStr = new RegExp(`^${startMark}([\\s\\S]+?)^${endMark}`, 'gm')
+        result = result.replace(regStr, (full, $1) => {
+          return ['ul', 'ol'].includes(markType)
+            ? this.parseNestedList(full.trim()) // 单独处理列表
+            : this.parseSingleType(markType)($1.trim())
         })
       }
 
@@ -602,6 +599,45 @@ export default {
         default:
           break
       }
+    },
+
+    /**
+     * 处理嵌套列表
+     */
+    parseNestedList(content) {
+      let lineStr = content.trim().split('\n')
+      let i = 0
+      let j = lineStr.length - 1
+      while (i <= j) {
+        while (i <= j && lineStr[i].trim()[0] !== '#') {
+          lineStr[i] = lineStr[i].replace(/\b.+/g, (item) => {
+            return `\\item ${item}`
+          })
+          i++
+        }
+        while (i <= j && lineStr[j].trim()[0] !== '#') {
+          lineStr[j] = lineStr[j].replace(/\b.+/g, (item) => {
+            return `\\item ${item}`
+          })
+          j--
+        }
+
+        let listType = lineStr[i].trim()
+        lineStr[i] = lineStr[i].replace(
+          listType,
+          `\\begin{${
+            listType === '#ol' ? 'enumerate' : 'itemize'
+          }}[leftmargin=2\\parindent]`
+        )
+        lineStr[j] = lineStr[j].replace(
+          /#/g,
+          `\\end{${listType === '#ol' ? 'enumerate' : 'itemize'}}`
+        )
+        i++
+        j--
+      }
+      let res = lineStr.join('\n')
+      return res
     },
     /**
      * 处理有序列表
@@ -931,7 +967,7 @@ export default {
   display: flex;
   flex-direction: row;
   padding: 5px;
-  /* min-height: calc(100vh - 70px); */
+  min-height: calc(100vh - 70px);
 }
 
 .content-wrapper section {
