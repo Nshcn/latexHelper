@@ -136,7 +136,7 @@
                   class="text-area lh-area"
                   id="lh-area"
                   placeholder="请输入内容"
-                  :autosize="{ minRows:50}"
+                  :autosize="{ minRows:25}"
                   v-model="originText"
                   @keydown.tab.native="tabInput($event)"
                   show-word-limit>
@@ -229,7 +229,7 @@
                   class="text-area"
                   :class="{active:isActive}"
                   id="latex-area"
-                  :autosize="{ minRows:50}"
+                  :autosize="{ minRows:31}"
                   placeholder="预览"
                   v-model="latexCode"
                   @keydown.tab.native="tabInput($event)"
