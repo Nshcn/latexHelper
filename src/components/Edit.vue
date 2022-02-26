@@ -3,12 +3,9 @@
     <header>
       <span>LatexHelper</span>
       <div class="header-right">
-        <i class="el-icon-document"
+        <i class="el-icon-question"
            onclick="window.open('https://github.com/Nshcn/latexHelper')">
           帮助</i>
-        <i class="el-icon-question"
-           onclick="window.open('https://github.com/Nshcn/latexHelper/issues/new')">
-          issue</i>
       </div>
     </header>
     <div class="content-wrapper">
@@ -611,17 +608,19 @@ export default {
       while (i <= j) {
         while (i <= j && lineStr[i].trim()[0] !== '#') {
           lineStr[i] = lineStr[i].replace(/\b.+/g, (item) => {
-            return `\\item ${item}`
+            return `    \\item ${item}`
           })
           i++
         }
         while (i <= j && lineStr[j].trim()[0] !== '#') {
           lineStr[j] = lineStr[j].replace(/\b.+/g, (item) => {
-            return `\\item ${item}`
+            return `    \\item ${item}`
           })
           j--
         }
-
+        if (i >= j) {
+          break
+        }
         let listType = lineStr[i].trim()
         lineStr[i] = lineStr[i].replace(
           listType,
