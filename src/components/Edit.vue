@@ -618,7 +618,7 @@ export default {
           })
           j--
         }
-        if (i >= j) {
+        if (i > j) {
           break
         }
         let listType = lineStr[i].trim()
