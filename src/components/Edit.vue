@@ -796,14 +796,11 @@ export default {
      * 处理选择题选项
      */
     parseChoiceQuestion(content) {
-      let choices = content
-        .trim()
-        .split(/[ABCD\-+][.|,|，|。|\s]{0,}/)
-        .slice(1)
+      let choices = content.trim().split('\n').sort()
       let itemStr = ''
       for (let item of choices) {
-        item = item.trim()
-        itemStr += `{${item}}\n`
+        item = item.trim().replace(/\b[A-Z\-+]\b[.,，、。\s]{0,}/g, '')
+        itemStr += item ? `{${item}}\n` : ''
       }
       // 根据选项长度自动匹配合适的选择行数
       let maxItemLen = this.findLongestWord(choices)
