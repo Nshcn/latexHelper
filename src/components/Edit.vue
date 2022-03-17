@@ -796,15 +796,13 @@ export default {
      * 处理选择题选项
      */
     parseChoiceQuestion(content) {
-      let choices = content.split('\n')
+      let choices = content
+        .trim()
+        .split(/[ABCD\-+][.|,|，|。|\s]{0,}/)
+        .slice(1)
       let itemStr = ''
-      // 去除选项前的字母
-      let regStr = /^[ABCD\-+][.|,|，|。|\s]{0,}/
       for (let item of choices) {
         item = item.trim()
-        if (regStr.test(item)) {
-          item = item.replace(regStr, '')
-        }
         itemStr += `{${item}}\n`
       }
       // 根据选项长度自动匹配合适的选择行数
