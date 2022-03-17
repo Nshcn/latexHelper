@@ -799,7 +799,7 @@ export default {
       let choices = content.trim().split('\n').sort()
       let itemStr = ''
       for (let item of choices) {
-        item = item.trim().replace(/\b[A-Z\-+]\b[.,，、。\s]{0,}/g, '')
+        item = item.trim().replace(/^[A-Z\-+][.,，、。\s]{0,}/, '')
         itemStr += item ? `{${item}}\n` : ''
       }
       // 根据选项长度自动匹配合适的选择行数
