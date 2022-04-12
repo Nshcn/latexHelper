@@ -163,7 +163,7 @@ export default {
               optionB,
               optionC,
               optionD
-            )}\n}{${source}}{${book}_${place}}{${point}}\n`
+            )}\n}{${source}}{${book}-${place.replace('_', '-')}}{${point}}\n`
             let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
             exercisesArr.push(exerciseCode)
             answersArr.push(answerCode)
