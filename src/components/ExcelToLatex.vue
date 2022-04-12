@@ -7,8 +7,10 @@
     <input type="file"
            @change="loadExcel" />
     <el-button type="primary"
+               size="small"
                @click="copyResult('exercises')">复制题目</el-button>
     <el-button type="primary"
+               size="small"
                @click="copyResult('answer')">复制答案</el-button>
     <div class="text-area">
       <el-input type="textarea"
