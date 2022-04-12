@@ -1,16 +1,18 @@
 <template>
   <div id="app">
-    <edit></edit>
+    <edit v-if="false"></edit>
+    <excel-to-latex />
   </div>
 </template>
 
 <script>
 import Edit from '@/components/Edit.vue'
-
+import ExcelToLatex from '@/components/ExcelToLatex'
 export default {
   name: 'App',
   components: {
     Edit,
+    ExcelToLatex,
   },
   watch: {},
   data() {
