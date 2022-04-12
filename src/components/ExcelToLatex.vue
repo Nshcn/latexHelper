@@ -152,7 +152,7 @@ export default {
 
     // 处理题干中的括号
     parseQuestion(content) {
-      return content.replace(/[（(〔]\s{0,9}[）)〕]/g, '\\choice')
+      return content.replace(/[（(〔]\s{0,9}[）)〕]/g, '\\choice ')
     },
 
     // 处理选择题选项
