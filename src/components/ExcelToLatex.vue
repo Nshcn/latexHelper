@@ -2,7 +2,9 @@
   <div>
     <p style="font-size:12px">
       上传excel前，处理一下表头：脚本识别的列名为：'题干'、'选项'、'参考答案'、'解析'、'知识点1'、'知识点2'、'知识点3'、'知识点4'、'出处'、'页号+题号'、'书名'。<br />
-      选择题的每个选项换行，不用处理前面的ABCD选项字母以及复制过来可能错误的选项标点符号。
+      选择题选项可以放在一个同一单元格“选项”中，也可以分别放在四列：“选项A”、“选项B”、“选项C”、“选项D”。<br />
+      如果所有选项放在同一个单元格中，选项之间换行分割。<br />
+      不用自己删除选项前的ABCD字母以及复制过来可能错误的选项标点符号，如“A、”，“B。”，“C，”，“D.”等，会自动过滤掉。
     </p>
     <input type="file"
            @change="loadExcel" />
@@ -65,6 +67,10 @@ export default {
         let typeColMap = {
           题干: 'question',
           选项: 'options',
+          选项A: 'optionA',
+          选项B: 'optionB',
+          选项C: 'optionC',
+          选项D: 'optionD',
           参考答案: 'answer',
           解析: 'analysis',
           知识点1: 'point1',
@@ -93,6 +99,10 @@ export default {
             switch (table[str[i] + '1'].v) {
               case '题干':
               case '选项':
+              case '选项A':
+              case '选项B':
+              case '选项C':
+              case '选项D':
               case '参考答案':
               case '解析':
               case '知识点1':
@@ -122,23 +132,38 @@ export default {
           let singleLine = {}
           for (let [key, value] of Object.entries(typeColMap)) {
             let location = typeToColIndex[value] + i
-            singleLine[value] = table[location] ? table[location].v : ''
+            singleLine[value] = table[location] ? String(table[location].v) : ''
           }
-          const { question, options, answer, analysis, place, source, book } =
-            singleLine
-          if (options !== '') {
-            let point = ''
-            for (let i = 1; i <= 4; i++) {
+          const {
+            question,
+            options,
+            optionA,
+            optionB,
+            optionC,
+            optionD,
+            answer,
+            analysis,
+            place,
+            source,
+            book,
+          } = singleLine
+          if (options || optionA || optionB || optionC || optionD) {
+            let point = singleLine['point1']
+            for (let i = 2; i <= 4; i++) {
               point +=
                 singleLine[`point${i}`] !== ''
-                  ? singleLine[`point${i}`] + '、'
+                  ? '、' + singleLine[`point${i}`]
                   : ''
             }
             let exerciseCode = `\\choicequestion{\n${this.parseQuestion(
               question
             )}\n}{\n${this.parseOptions(
-              options
-            )}\n}{${source}}{${place}}{${point}}\n`
+              options,
+              optionA,
+              optionB,
+              optionC,
+              optionD
+            )}\n}{${source}}{${book}_${place}}{${point}}\n`
             let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
             exercisesArr.push(exerciseCode)
             answersArr.push(answerCode)
@@ -156,13 +181,19 @@ export default {
     },
 
     // 处理选择题选项
-    parseOptions(content) {
-      if (content === '') {
+    parseOptions(options, optionA, optionB, optionC, optionD) {
+      let choices
+      if (options !== '') {
+        choices = options.trim().split('\n').sort()
+      } else if (optionA || optionB || optionC || optionD) {
+        choices = [optionA, optionB, optionC, optionD]
+        console.log(choices)
+      } else {
         return ''
       }
-      let choices = content.trim().split('\n').sort()
       let itemStr = ''
       for (let item of choices) {
+        console.log(item)
         item = item.trim().replace(/^[A-Z\-+][.,，、。\s]{0,}/, '')
         itemStr += item ? `{${item}}` : ''
       }
@@ -173,6 +204,7 @@ export default {
       } else if (maxItemLen >= 15) {
         return `\\fourline${itemStr}`
       } else {
+        console.log('two', itemStr)
         return `\\twoline${itemStr}`
       }
     },
