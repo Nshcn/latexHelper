@@ -22,6 +22,8 @@ jobs:
 
     steps: # 自动化步骤
       - uses: actions/checkout@v2
+      - name: 切换源
+        run: npm config set registry http://registry.npm.taobao.org/
       - name: npm install
         run: npm install
       - name: npm run build
