@@ -1,7 +1,7 @@
 <template>
   <div>
     <p style="font-size:12px">
-      上传excel前，处理一下表头：脚本识别的列名为：'题干'、'选项'、'参考答案'、'解析'、'知识点1'、'知识点2'、'知识点3'、'知识点4'、'出处'、'页号+题号'、'书名'。<br />
+      上传excel前，处理一下表头：脚本识别的列名为：'题干'、'选项'、'参考答案'、'解析'、'知识点1'、'知识点2'、'知识点3'、'知识点4'、'出处'、'页号+题号'、'书名'、'所属小节'。<br />
       选择题选项可以放在一个同一单元格“选项”中，也可以分别放在四列：“选项A”、“选项B”、“选项C”、“选项D”。<br />
       如果所有选项放在同一个单元格中，选项之间换行分割。<br />
       不用自己删除选项前的ABCD字母以及复制过来可能错误的选项标点符号，如“A、”，“B。”，“C，”，“D.”等，会自动过滤掉。
@@ -13,12 +13,14 @@
               :type="tableLatex[tableName].length>0?'success':'danger'"
               @click="toggleTable(tableName)"
               size="small"
-              :key="tableName">{{tableName}}{{tableLatex[tableName].length}}</el-tag>
+              :key="tableName">{{tableName}}</el-tag>
     </div>
-    <div>
-      <el-button v-for="section in []"
+    <div v-if="currentTable!==''">
+      <h1>{{currentTable+'('+tableLatex[currentTable].length+')'}}</h1>
+      <el-button v-for="section in tableLatex[currentTable].sectionName"
                  type="text"
-                 :key="section">{{section}}</el-button>
+                 @click="toggleSection(section)"
+                 :key="section">{{section+'('+tableLatex[currentTable][section].exercisesArr.length+')'}}</el-button>
     </div>
     <div>
       <el-button type="primary"
@@ -59,6 +61,7 @@ export default {
   created() {},
   data() {
     return {
+      currentTable: '',
       tableNameArr: [],
       tableOrigin: {}, // 原始的表格数据
       tableLatex: {}, // latex表格数据
@@ -97,7 +100,9 @@ export default {
       reader.onload = (e) => {
         var data = e.target.result
         var workbook = XLSX.read(data, { type: 'binary' })
+        var workbook1 = XLSX.read(data, { type: 'array' })
         console.log(workbook)
+        console.log(workbook1)
         this.tableNameArr = workbook.SheetNames
         this.tableOrigin = workbook.Sheets
         for (let tableName of this.tableNameArr) {
@@ -159,8 +164,9 @@ export default {
         return i - 1
       }
       let rowLen = getRowLen()
-      let exercisesArr = []
-      let answersArr = []
+      this.tableLatex[tableName] = { length: 0, sectionName: [] }
+      // let exercisesArr = []
+      // let answersArr = []
       for (let i = 2; i <= rowLen; i++) {
         let singleLine = {}
         for (let value of Object.values(this.typeColMap)) {
@@ -183,7 +189,7 @@ export default {
           book,
           section,
         } = singleLine
-        console.log(section)
+
         // 存在至少一个选项时识别为选择题
         if (options || optionA || optionB || optionC || optionD) {
           // 处理知识点
@@ -204,22 +210,40 @@ export default {
             optionD
           )}\n}{${source}}{${book}-${place.replace('_', '-')}}{${point}}\n`
           let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
-          exercisesArr.push(exerciseCode)
-          answersArr.push(answerCode)
+
+          // 将题目添加到对应的小节中
+          if (this.tableLatex[tableName][section] === undefined) {
+            this.tableLatex[tableName].sectionName.push(section)
+            this.tableLatex[tableName][section] = {
+              exercisesArr: [],
+              answersArr: [],
+            }
+          }
+          this.tableLatex[tableName].length++
+          this.tableLatex[tableName][section].exercisesArr.push(exerciseCode)
+          this.tableLatex[tableName][section].answersArr.push(answerCode)
         }
       }
-      this.tableLatex[tableName] = {
-        exercisesArr: exercisesArr.join('\n'),
-        answersArr: answersArr.join('\n'),
-        length: exercisesArr.length,
-      }
+      console.log(tableName, this.tableLatex[tableName])
     },
 
-    // 切换显示的table结果
+    // 切换table
     toggleTable(tableName) {
-      let tableLatex = this.tableLatex[tableName]
-      this.latexExercises = tableLatex.exercisesArr
-      this.latexAnswers = tableLatex.answersArr
+      this.latexExercises = ''
+      this.latexAnswers = ''
+      this.currentTable = tableName
+      if (this.tableLatex[tableName].sectionName.length === 0) {
+        this.$message({
+          message: '该表格下未分章节',
+          type: 'warning',
+        })
+      }
+    },
+    // 切换并显示section
+    toggleSection(sectionName) {
+      let tableLatex = this.tableLatex[this.currentTable]
+      this.latexExercises = tableLatex[sectionName].exercisesArr.join('\n')
+      this.latexAnswers = tableLatex[sectionName].answersArr.join('\n')
     },
     // 处理题干中的括号
     parseQuestion(content) {
@@ -258,6 +282,7 @@ export default {
       }
     },
 
+    // 复制到剪切板
     copyResult(type) {
       let content =
         '\n' +
