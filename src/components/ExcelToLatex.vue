@@ -187,17 +187,28 @@ export default {
                 ? '、' + singleLine[`point${i}`]
                 : ''
           }
-          let exerciseCode = `\\choicequestion{\n${this.parseQuestion(
+
+          let newPlace = place.replace('_', '-')
+          let exerciseCode = `\\begin{choiceq}{${source}}{${book}-${newPlace}}{${point}}\n\\qprefix ${this.parseQuestion(
             question
-          )}\n}{\n${this.parseOptions(
+          )} \n${this.parseOptions(
             options,
             optionA,
             optionB,
             optionC,
             optionD
-          )}\n}{${source}}{${book}-${place.replace('_', '-')}}{${point}}\n`
-          let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
-
+          )}\n\\end{choiceq}\n`
+          // let exerciseCode = `\\choicequestion{\n${this.parseQuestion(
+          //   question
+          // )}\n}{\n${this.parseOptions(
+          //   options,
+          //   optionA,
+          //   optionB,
+          //   optionC,
+          //   optionD
+          // )}\n}{${source}}{${book}-${newPlace}}{${point}}\n`
+          // let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
+          let answerCode = `% ${book}-${newPlace}\n\\begin{choiceanswer}{${answer}}\n${analysis}\n\\end{choiceanswer}\n`
           // 将题目添加到对应的小节中
           if (this.tableLatex[tableName][section] === undefined) {
             this.tableLatex[tableName].sectionName.push(section)
