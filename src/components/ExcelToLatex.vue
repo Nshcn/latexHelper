@@ -8,12 +8,26 @@
     </p>
     <input type="file"
            @change="loadExcel" />
-    <el-button type="primary"
-               size="small"
-               @click="copyResult('exercises')">复制题目</el-button>
-    <el-button type="primary"
-               size="small"
-               @click="copyResult('answer')">复制答案</el-button>
+    <div>
+      <el-tag v-for="tableName in tableNameArr"
+              :type="tableLatex[tableName].length>0?'success':'danger'"
+              @click="toggleTable(tableName)"
+              size="small"
+              :key="tableName">{{tableName}}{{tableLatex[tableName].length}}</el-tag>
+    </div>
+    <div>
+      <el-button v-for="section in []"
+                 type="text"
+                 :key="section">{{section}}</el-button>
+    </div>
+    <div>
+      <el-button type="primary"
+                 size="small"
+                 @click="copyResult('exercises')">复制题目</el-button>
+      <el-button type="primary"
+                 size="small"
+                 @click="copyResult('answer')">复制答案</el-button>
+    </div>
     <div class="text-area">
       <el-input type="textarea"
                 placeholder="题目代码"
@@ -34,7 +48,7 @@
   </div>
 </template>
 
-<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <script>
 import * as XLSX from 'xlsx'
 
@@ -45,8 +59,30 @@ export default {
   created() {},
   data() {
     return {
+      tableNameArr: [],
+      tableOrigin: {}, // 原始的表格数据
+      tableLatex: {}, // latex表格数据
       latexExercises: '',
       latexAnswers: '',
+      // 列名
+      typeColMap: {
+        题干: 'question',
+        选项: 'options',
+        选项A: 'optionA',
+        选项B: 'optionB',
+        选项C: 'optionC',
+        选项D: 'optionD',
+        参考答案: 'answer',
+        解析: 'analysis',
+        知识点1: 'point1',
+        知识点2: 'point2',
+        知识点3: 'point3',
+        知识点4: 'point4',
+        出处: 'source',
+        '页号+题号': 'place',
+        书名: 'book',
+        所属小节: 'section',
+      },
     }
   },
   methods: {
@@ -55,126 +91,136 @@ export default {
       this.readWorkbookFromLocalFile(file)
     },
 
-    // 读取本地excel文件，读取Excel文件对象
-    readWorkbookFromLocalFile(file, callback) {
+    // 读取本地excel文件
+    readWorkbookFromLocalFile(file) {
       var reader = new FileReader()
       reader.onload = (e) => {
         var data = e.target.result
         var workbook = XLSX.read(data, { type: 'binary' })
-        let table = workbook.Sheets.Sheet1
-        let str = 'ABCDEFGHIJKLMNOPQ'
-        let typeToColIndex = {}
-        let typeColMap = {
-          题干: 'question',
-          选项: 'options',
-          选项A: 'optionA',
-          选项B: 'optionB',
-          选项C: 'optionC',
-          选项D: 'optionD',
-          参考答案: 'answer',
-          解析: 'analysis',
-          知识点1: 'point1',
-          知识点2: 'point2',
-          知识点3: 'point3',
-          知识点4: 'point4',
-          出处: 'source',
-          '页号+题号': 'place',
-          书名: 'book',
+        console.log(workbook)
+        this.tableNameArr = workbook.SheetNames
+        this.tableOrigin = workbook.Sheets
+        for (let tableName of this.tableNameArr) {
+          this.transfromSingleTable(tableName)
         }
-        // 获得列数
-        const getColLen = () => {
-          let len = 1
-          for (let i = 0; i < str.length; i++) {
-            if (table[str[i] + '1']) {
-              len++
-            }
-          }
-          return len - 1
-        }
-        let colLen = getColLen()
-
-        // 获得所需列名的索引
-        for (let i = 1; i <= colLen; i++) {
-          if (table[str[i] + '1']) {
-            switch (table[str[i] + '1'].v) {
-              case '题干':
-              case '选项':
-              case '选项A':
-              case '选项B':
-              case '选项C':
-              case '选项D':
-              case '参考答案':
-              case '解析':
-              case '知识点1':
-              case '知识点2':
-              case '知识点3':
-              case '知识点4':
-              case '出处':
-              case '页号+题号':
-              case '书名':
-                typeToColIndex[typeColMap[table[str[i] + '1'].v]] = str[i]
-                break
-            }
-          }
-        }
-        // 获取有效行数
-        const getRowLen = () => {
-          let i = 1
-          while (table['A' + i]) {
-            i++
-          }
-          return i - 1
-        }
-        let rowLen = getRowLen()
-        let exercisesArr = []
-        let answersArr = []
-        for (let i = 2; i <= rowLen; i++) {
-          let singleLine = {}
-          for (let [key, value] of Object.entries(typeColMap)) {
-            let location = typeToColIndex[value] + i
-            singleLine[value] = table[location] ? String(table[location].v) : ''
-          }
-          const {
-            question,
-            options,
-            optionA,
-            optionB,
-            optionC,
-            optionD,
-            answer,
-            analysis,
-            place,
-            source,
-            book,
-          } = singleLine
-          if (options || optionA || optionB || optionC || optionD) {
-            let point = singleLine['point1']
-            for (let i = 2; i <= 4; i++) {
-              point +=
-                singleLine[`point${i}`] !== ''
-                  ? '、' + singleLine[`point${i}`]
-                  : ''
-            }
-            let exerciseCode = `\\choicequestion{\n${this.parseQuestion(
-              question
-            )}\n}{\n${this.parseOptions(
-              options,
-              optionA,
-              optionB,
-              optionC,
-              optionD
-            )}\n}{${source}}{${book}-${place.replace('_', '-')}}{${point}}\n`
-            let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
-            exercisesArr.push(exerciseCode)
-            answersArr.push(answerCode)
-          }
-        }
-        this.latexExercises = exercisesArr.join('\n')
-        this.latexAnswers = answersArr.join('\n')
       }
       reader.readAsBinaryString(file)
     },
 
+    // 单个表格转换成latex
+    transfromSingleTable(tableName) {
+      let tableData = this.tableOrigin[tableName]
+      let str = 'ABCDEFGHIJKLMNOPQ'
+      let typeToColIndex = {}
+      // 获得列数
+      const getColLen = () => {
+        let len = 1
+        for (let i = 0; i < str.length; i++) {
+          if (tableData[str[i] + '1']) {
+            len++
+          }
+        }
+        return len - 1
+      }
+      let colLen = getColLen()
+
+      // 获得所需列名的索引
+      for (let i = 1; i <= colLen; i++) {
+        if (tableData[str[i] + '1']) {
+          switch (tableData[str[i] + '1'].v) {
+            case '题干':
+            case '选项':
+            case '选项A':
+            case '选项B':
+            case '选项C':
+            case '选项D':
+            case '参考答案':
+            case '解析':
+            case '知识点1':
+            case '知识点2':
+            case '知识点3':
+            case '知识点4':
+            case '出处':
+            case '页号+题号':
+            case '书名':
+            case '所属小节':
+              typeToColIndex[this.typeColMap[tableData[str[i] + '1'].v]] =
+                str[i]
+              break
+          }
+        }
+      }
+      // 获取有效行数
+      const getRowLen = () => {
+        let i = 1
+        while (tableData['A' + i]) {
+          i++
+        }
+        return i - 1
+      }
+      let rowLen = getRowLen()
+      let exercisesArr = []
+      let answersArr = []
+      for (let i = 2; i <= rowLen; i++) {
+        let singleLine = {}
+        for (let value of Object.values(this.typeColMap)) {
+          let location = typeToColIndex[value] + i
+          singleLine[value] = tableData[location]
+            ? String(tableData[location].v)
+            : ''
+        }
+        const {
+          question,
+          options,
+          optionA,
+          optionB,
+          optionC,
+          optionD,
+          answer,
+          analysis,
+          place,
+          source,
+          book,
+          section,
+        } = singleLine
+        console.log(section)
+        // 存在至少一个选项时识别为选择题
+        if (options || optionA || optionB || optionC || optionD) {
+          // 处理知识点
+          let point = singleLine['point1']
+          for (let i = 2; i <= 4; i++) {
+            point +=
+              singleLine[`point${i}`] !== ''
+                ? '、' + singleLine[`point${i}`]
+                : ''
+          }
+          let exerciseCode = `\\choicequestion{\n${this.parseQuestion(
+            question
+          )}\n}{\n${this.parseOptions(
+            options,
+            optionA,
+            optionB,
+            optionC,
+            optionD
+          )}\n}{${source}}{${book}-${place.replace('_', '-')}}{${point}}\n`
+          let answerCode = `\\choiceanswer{${answer}}{\n${analysis}\n}\n`
+          exercisesArr.push(exerciseCode)
+          answersArr.push(answerCode)
+        }
+      }
+      this.tableLatex[tableName] = {
+        exercisesArr: exercisesArr.join('\n'),
+        answersArr: answersArr.join('\n'),
+        length: exercisesArr.length,
+      }
+    },
+
+    // 切换显示的table结果
+    toggleTable(tableName) {
+      let tableLatex = this.tableLatex[tableName]
+      this.latexExercises = tableLatex.exercisesArr
+      this.latexAnswers = tableLatex.answersArr
+    },
     // 处理题干中的括号
     parseQuestion(content) {
       return content.replace(/[（(〔]\s{0,9}[）)〕]/g, '\\choice ')
@@ -187,33 +233,29 @@ export default {
         choices = options.trim().split('\n').sort()
       } else if (optionA || optionB || optionC || optionD) {
         choices = [optionA, optionB, optionC, optionD]
-        console.log(choices)
       } else {
         return ''
       }
       let itemStr = ''
       for (let item of choices) {
-        console.log(item)
         item = item.trim().replace(/^[A-Z\-+][.,，、。\s]{0,}/, '')
         itemStr += item ? `{${item}}` : ''
       }
       // 根据选项长度自动匹配合适的选择行数
-      let maxItemLen = this.findLongestWord(choices)
+      const findLongestWord = (strArray) => {
+        strArray.sort(function (a, b) {
+          return b.length - a.length
+        })
+        return strArray[0].length
+      }
+      let maxItemLen = findLongestWord(choices)
       if (maxItemLen <= 9) {
         return `\\oneline${itemStr}`
       } else if (maxItemLen >= 15) {
         return `\\fourline${itemStr}`
       } else {
-        console.log('two', itemStr)
         return `\\twoline${itemStr}`
       }
-    },
-
-    findLongestWord(strArray) {
-      strArray.sort(function (a, b) {
-        return b.length - a.length
-      })
-      return strArray[0].length
     },
 
     copyResult(type) {
