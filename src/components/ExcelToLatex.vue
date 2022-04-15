@@ -1,7 +1,7 @@
 <template>
   <div>
     <p style="font-size:12px">
-      上传excel前，处理一下表头：脚本识别的列名为：'题干'、'选项'、'参考答案'、'解析'、'知识点1'、'知识点2'、'知识点3'、'知识点4'、'出处'、'页号+题号'、'书名'、'所属小节'。<br />
+      上传excel前，处理一下表头：脚本识别的列名为：'题干'、'选项'、'参考答案'、'解析'、'知识点1'、'知识点2'、'知识点3'、'知识点4'、'出处'、'页号+题号'、'书名'、'所属小节'、'题目图片'。<br />
       选择题选项可以放在一个同一单元格“选项”中，也可以分别放在四列：“选项A”、“选项B”、“选项C”、“选项D”。<br />
       如果所有选项放在同一个单元格中，选项之间换行分割。<br />
       不用自己删除选项前的ABCD字母以及复制过来可能错误的选项标点符号，如“A、”，“B。”，“C，”，“D.”等，会自动过滤掉。
@@ -85,6 +85,7 @@ export default {
         '页号+题号': 'place',
         书名: 'book',
         所属小节: 'section',
+        题目图片: 'figure',
       },
     }
   },
@@ -100,20 +101,23 @@ export default {
       reader.onload = (e) => {
         var data = e.target.result
         var workbook = XLSX.read(data, { type: 'binary' })
-        var workbook1 = XLSX.read(data, { type: 'array' })
+
         console.log(workbook)
-        console.log(workbook1)
-        this.tableNameArr = workbook.SheetNames
+        // 筛选掉评分表
+        this.tableNameArr = workbook.SheetNames.filter(
+          (name) => name.indexOf('评分') === -1
+        )
+
         this.tableOrigin = workbook.Sheets
         for (let tableName of this.tableNameArr) {
-          this.transfromSingleTable(tableName)
+          this.transformSingleTable(tableName)
         }
       }
       reader.readAsBinaryString(file)
     },
 
     // 单个表格转换成latex
-    transfromSingleTable(tableName) {
+    transformSingleTable(tableName) {
       let tableData = this.tableOrigin[tableName]
       let str = 'ABCDEFGHIJKLMNOPQ'
       let typeToColIndex = {}
@@ -130,31 +134,15 @@ export default {
       let colLen = getColLen()
 
       // 获得所需列名的索引
+      let colName = Object.keys(this.typeColMap)
       for (let i = 1; i <= colLen; i++) {
         if (tableData[str[i] + '1']) {
-          switch (tableData[str[i] + '1'].v) {
-            case '题干':
-            case '选项':
-            case '选项A':
-            case '选项B':
-            case '选项C':
-            case '选项D':
-            case '参考答案':
-            case '解析':
-            case '知识点1':
-            case '知识点2':
-            case '知识点3':
-            case '知识点4':
-            case '出处':
-            case '页号+题号':
-            case '书名':
-            case '所属小节':
-              typeToColIndex[this.typeColMap[tableData[str[i] + '1'].v]] =
-                str[i]
-              break
+          if (colName.includes(tableData[str[i] + '1'].v)) {
+            typeToColIndex[this.typeColMap[tableData[str[i] + '1'].v]] = str[i]
           }
         }
       }
+
       // 获取有效行数
       const getRowLen = () => {
         let i = 1
@@ -165,8 +153,7 @@ export default {
       }
       let rowLen = getRowLen()
       this.tableLatex[tableName] = { length: 0, sectionName: [] }
-      // let exercisesArr = []
-      // let answersArr = []
+
       for (let i = 2; i <= rowLen; i++) {
         let singleLine = {}
         for (let value of Object.values(this.typeColMap)) {
@@ -234,7 +221,7 @@ export default {
       this.currentTable = tableName
       if (this.tableLatex[tableName].sectionName.length === 0) {
         this.$message({
-          message: '该表格下未分章节',
+          message: '该表格未分章节',
           type: 'warning',
         })
       }
